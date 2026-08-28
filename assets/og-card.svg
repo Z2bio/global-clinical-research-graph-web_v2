@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef6fc"/><stop offset="1" stop-color="#dbeef7"/></linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b5cab"/><stop offset="1" stop-color="#1686b7"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1040" cy="90" r="210" fill="#0b5cab" opacity=".05"/>
+  <circle cx="110" cy="590" r="230" fill="#1686b7" opacity=".06"/>
+  <rect x="95" y="110" width="100" height="100" rx="28" fill="url(#mark)"/>
+  <circle cx="145" cy="160" r="31" fill="none" stroke="#fff" stroke-width="5"/>
+  <path d="M114 160h62M121 142c7 6 15 9 24 9s17-3 24-9M121 178c7-6 15-9 24-9s17 3 24 9" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <text x="95" y="300" fill="#092641" font-family="Arial, Microsoft YaHei, sans-serif" font-size="58" font-weight="700">全球临床试验公示牌</text>
+  <text x="95" y="375" fill="#365b75" font-family="Arial, Microsoft YaHei, sans-serif" font-size="34">公开信息查询平台</text>
+  <text x="95" y="455" fill="#5d778b" font-family="Arial, Microsoft YaHei, sans-serif" font-size="26">疾病 · 药企 · 医院 · 研究阶段 · 执行中心 · 最新进展</text>
+  <rect x="95" y="505" width="470" height="46" rx="23" fill="#fff" opacity=".86"/>
+  <text x="120" y="537" fill="#0b5cab" font-family="Arial, Microsoft YaHei, sans-serif" font-size="21" font-weight="700">ClinicalTrials.gov 公开数据 · 访问时同步</text>
+</svg>

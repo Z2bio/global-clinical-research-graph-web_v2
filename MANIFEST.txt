@@ -1,0 +1,44 @@
+Global + China Clinical Research Graph v2.0.0
+Generated: 2026-08-28
+
+       714  ./.github/workflows/deploy-pages.yml
+         0  ./.nojekyll
+     20240  ./404.html
+      1056  ./LICENSE
+      3665  ./README.md
+     31317  ./assets/css/styles.css
+       592  ./assets/favicon.svg
+       592  ./assets/icon-192.svg
+       592  ./assets/icon-512.svg
+      4205  ./assets/js/api.js
+     42545  ./assets/js/app.js
+       500  ./assets/js/config.js
+      4328  ./assets/js/dictionary.js
+     11568  ./assets/js/federated.js
+      2350  ./assets/js/graph.js
+     14322  ./assets/js/normalizer.js
+      3111  ./assets/js/storage.js
+      1633  ./assets/og-card.svg
+      1439  ./data/README.md
+       224  ./data/chictr.json
+       224  ./data/nmpa.json
+       224  ./data/nmrr.json
+       224  ./data/who-ictrp.json
+      1720  ./docs/API_FIELD_MAPPING.md
+      1848  ./docs/ARCHITECTURE.md
+      4213  ./docs/DATA_SOURCE_MATRIX.md
+      1362  ./docs/DEPLOYMENT.md
+      1165  ./docs/TEST_REPORT.md
+       723  ./docs/UPGRADE_NOTES_V2.md
+       958  ./docs/VALIDATION_REPORT.md
+     20240  ./index.html
+       607  ./manifest.webmanifest
+       484  ./package.json
+        23  ./robots.txt
+      2863  ./scripts/audit.mjs
+      1616  ./sw.js
+      2898  ./tests/federated.test.mjs
+      4928  ./tests/fixtures/studies.json
+        70  ./tests/fixtures/version.json
+      2048  ./tests/normalizer.test.mjs
+       747  ./tests/storage.test.mjs

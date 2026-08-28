@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b5cab">
+  <meta name="description" content="面向全球与中国的临床研究公开信息聚合框架：ClinicalTrials.gov 实时查询，并预留 WHO ICTRP、ChiCTR、国家医学研究登记备案与 NMPA 多源接入。">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta property="og:title" content="Global + China Clinical Research Graph">
+  <meta property="og:description" content="分层查询全球与中国临床研究公开信息，保留来源、注册编号与证据链。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./assets/og-card.svg">
+  <title>Global + China Clinical Research Graph</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <header class="site-header">
+    <div class="header-inner container">
+      <a class="brand" href="#/trials" aria-label="返回临床试验公示列表">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 44 44" role="img"><path d="M22 4a18 18 0 1 0 0 36 18 18 0 0 0 0-36Zm0 4c2.5 0 4.9.6 7 1.7-1.7 1.6-4 2.6-7 2.6s-5.3-1-7-2.6A13.9 13.9 0 0 1 22 8Zm-10.1 5.2c2.5 2 5.9 3.1 10.1 3.1s7.6-1.1 10.1-3.1a14 14 0 0 1 3.6 8.8H8.3a14 14 0 0 1 3.6-8.8ZM22 36c-2.5 0-4.9-.6-7-1.7 1.7-1.6 4-2.6 7-2.6s5.3 1 7 2.6A13.9 13.9 0 0 1 22 36Zm10.1-5.2c-2.5-2-5.9-3.1-10.1-3.1s-7.6 1.1-10.1 3.1A14 14 0 0 1 8.3 26h27.4a14 14 0 0 1-3.6 4.8Z"/></svg>
+        </span>
+        <span class="brand-copy">
+          <strong>全球 + 中国临床研究图谱</strong>
+          <small>Global + China Clinical Research Graph</small>
+        </span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="主导航">
+        <a href="#/trials" data-nav="trials">公示列表</a>
+        <a href="#/sources" data-nav="sources">数据源覆盖</a>
+        <a href="#/following" data-nav="following">我的关注 <span id="favorite-count-badge" class="nav-badge" hidden>0</span></a>
+        <a href="#/guide" data-nav="guide">阅读说明</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="refresh-button" class="icon-button" type="button" title="重新同步最新数据" aria-label="重新同步最新数据">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.7-4.7L3 9m0 0V4m0 5h5m-4 4a8.1 8.1 0 0 0 14.7 4.7L21 15m0 0v5m0-5h-5"/></svg>
+        </button>
+        <button id="mobile-menu-button" class="icon-button mobile-only" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="打开导航菜单">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav id="mobile-menu" class="mobile-menu container" aria-label="移动端导航" hidden>
+      <a href="#/trials">公示列表</a>
+      <a href="#/sources">数据源覆盖</a>
+      <a href="#/following">我的关注</a>
+      <a href="#/guide">阅读说明</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section id="trials-view" class="view" data-view="trials">
+      <div class="hero-shell">
+        <div class="container hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Global + China · 多源公开登记 · 来源可追溯</p>
+            <h1>从“单一药物试验库”升级为全球 + 中国临床研究公开信息图谱</h1>
+            <p class="hero-summary">第一层实时查询 ClinicalTrials.gov；第二层衔接 WHO ICTRP；第三层覆盖 ChiCTR 与国家医学研究登记备案；第四层补充 NMPA 中国药物注册性试验。所有记录保留来源、注册编号和原始页面。</p>
+          </div>
+
+          <form id="search-form" class="search-panel" role="search" autocomplete="off">
+            <label class="search-field" for="search-input">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+              <input id="search-input" name="query" type="search" maxlength="160" placeholder="输入疾病、药企、医院、药物或 NCT / ChiCTR / CTR 等注册编号" aria-describedby="search-help">
+            </label>
+            <button class="primary-button search-button" type="submit">查询公示</button>
+            <p id="search-help" class="search-help">ClinicalTrials.gov 支持访问时实时查询；其他来源在获得官方授权接口或合规数据快照后自动进入同一检索框架。</p>
+          </form>
+
+          <div class="sync-strip" aria-live="polite">
+            <div class="sync-primary">
+              <span id="sync-indicator" class="sync-dot" data-state="idle"></span>
+              <strong id="sync-status">准备同步公开数据</strong>
+              <span id="sync-detail">—</span>
+            </div>
+            <div class="sync-meta">
+              <span>官方数据时间：<b id="source-timestamp">待获取</b></span>
+              <span>本地缓存：<b id="cache-status">未使用</b></span>
+            </div>
+          </div>
+
+          <div id="source-layer-strip" class="source-layer-strip" aria-label="四层数据源架构">
+            <article><span>Layer 1</span><strong>全球主注册层</strong><small>ClinicalTrials.gov</small></article>
+            <article><span>Layer 2</span><strong>全球跨注册中心层</strong><small>WHO ICTRP</small></article>
+            <article><span>Layer 3</span><strong>中国广义临床研究层</strong><small>ChiCTR + 国家医学研究备案</small></article>
+            <article><span>Layer 4</span><strong>中国药物注册监管层</strong><small>NMPA</small></article>
+          </div>
+        </div>
+      </div>
+
+      <div class="container stats-grid" aria-label="当前查询概览">
+        <article class="stat-card">
+          <span class="stat-label">CTG 官方匹配结果</span>
+          <strong id="stat-total">—</strong>
+          <small>ClinicalTrials.gov API 总数</small>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">当前页招募中</span>
+          <strong id="stat-recruiting">—</strong>
+          <small>仅统计已加载记录</small>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">当前已出现来源</span>
+          <strong id="stat-countries">—</strong>
+          <small>按已加载证据来源统计</small>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">交叉注册记录</span>
+          <strong id="stat-recent">—</strong>
+          <small>仅按明确交叉编号合并</small>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">涉及执行机构</span>
+          <strong id="stat-institutions">—</strong>
+          <small>按已加载记录去重</small>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">涉及申办/发起方</span>
+          <strong id="stat-sponsors">—</strong>
+          <small>按已加载记录去重</small>
+        </article>
+      </div>
+
+      <div class="container main-grid">
+        <aside class="filters-panel" aria-label="筛选条件">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">结构化筛选</span>
+              <h2>缩小公示范围</h2>
+            </div>
+            <button id="reset-filters" class="text-button" type="button">重置</button>
+          </div>
+
+          <div class="filter-group">
+            <label for="status-filter">公开状态</label>
+            <select id="status-filter">
+              <option value="">全部状态</option>
+              <option value="RECRUITING">招募中</option>
+              <option value="NOT_YET_RECRUITING">尚未招募</option>
+              <option value="ENROLLING_BY_INVITATION">仅受邀招募</option>
+              <option value="ACTIVE_NOT_RECRUITING">进行中，不再招募</option>
+              <option value="SUSPENDED">暂停</option>
+              <option value="COMPLETED">已完成</option>
+              <option value="TERMINATED">已终止</option>
+              <option value="WITHDRAWN">已撤回</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="phase-filter">研究分期</label>
+            <select id="phase-filter">
+              <option value="">全部分期</option>
+              <option value="EARLY_PHASE1">早期Ⅰ期</option>
+              <option value="PHASE1">Ⅰ期</option>
+              <option value="PHASE2">Ⅱ期</option>
+              <option value="PHASE3">Ⅲ期</option>
+              <option value="PHASE4">Ⅳ期</option>
+              <option value="NA">不适用</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="country-filter">执行国家/地区</label>
+            <select id="country-filter">
+              <option value="">全部国家/地区</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="sponsor-filter">申办方类型</label>
+            <select id="sponsor-filter">
+              <option value="">全部类型</option>
+              <option value="INDUSTRY">企业</option>
+              <option value="NIH">美国国立卫生研究院</option>
+              <option value="FED">政府机构</option>
+              <option value="OTHER">医院、高校或其他机构</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="sort-filter">当前页排序</label>
+            <select id="sort-filter">
+              <option value="updated-desc">最近更新优先</option>
+              <option value="posted-desc">首次公示较新优先</option>
+              <option value="enrollment-desc">计划人数较多优先</option>
+              <option value="title-asc">标题字母顺序</option>
+            </select>
+          </div>
+
+          <div class="filter-note">
+            <strong>筛选说明</strong>
+            <p>ClinicalTrials.gov 状态直接参与实时 API 查询；其他已接入来源先进入统一结构，再在浏览器中按分期、国家和机构进一步筛选。</p>
+          </div>
+        </aside>
+
+        <section class="results-section" aria-labelledby="results-title">
+          <div class="results-toolbar">
+            <div>
+              <span class="panel-kicker">公开登记记录</span>
+              <h2 id="results-title">临床试验公示列表</h2>
+              <p id="results-summary">正在准备数据……</p>
+            </div>
+            <button id="mobile-filter-button" class="secondary-button mobile-filter-button" type="button">筛选</button>
+          </div>
+
+          <div id="active-filter-chips" class="filter-chips" aria-label="已启用筛选条件"></div>
+          <div id="results-alert" class="results-alert" role="status" hidden></div>
+          <div id="trial-list" class="trial-list" aria-live="polite"></div>
+
+          <div class="load-more-wrap">
+            <button id="load-more-button" class="secondary-button" type="button" hidden>加载更多公示记录</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="sources-view" class="view container inner-view" data-view="sources" hidden>
+      <header class="inner-header source-view-header">
+        <div>
+          <p class="eyebrow">四层公开数据架构</p>
+          <h1>数据源覆盖与接入状态</h1>
+          <p>这不是把五个网站简单堆在一起，而是把“研究”作为核心实体，把注册编号、申办/发起机构、执行医院、疾病、干预措施和来源记录连接成可追溯的数据图谱。</p>
+        </div>
+      </header>
+
+      <div class="source-architecture-banner">
+        <div><span>01</span><strong>全球主注册</strong><small>ClinicalTrials.gov · 访问时实时 API</small></div>
+        <div><span>02</span><strong>全球跨注册中心</strong><small>WHO ICTRP · 周更新聚合</small></div>
+        <div><span>03</span><strong>中国广义研究</strong><small>ChiCTR + 国家医学研究登记备案</small></div>
+        <div><span>04</span><strong>中国药物注册监管</strong><small>NMPA 药物临床试验公示</small></div>
+      </div>
+
+      <div class="source-principle-callout">
+        <strong>当前 GitHub Pages 版本的真实性边界</strong>
+        <p>ClinicalTrials.gov 已配置匿名实时 API。WHO ICTRP、ChiCTR、国家医学研究登记备案和 NMPA 均保留标准化适配器与快照入口；在取得官方授权接口、下载文件或合规导出之前，页面只显示“官方入口已配置 / 当前快照为空”，不会通过未授权网页抓取伪装成实时覆盖。</p>
+      </div>
+
+      <div id="source-center-grid" class="source-center-grid" aria-live="polite"></div>
+
+      <section class="graph-model-panel">
+        <div>
+          <p class="panel-kicker">Canonical research entity</p>
+          <h2>统一研究实体如何形成</h2>
+        </div>
+        <div class="graph-flow">
+          <span>来源记录</span><b>→</b><span>注册编号</span><b>→</b><span>研究实体</span><b>→</b><span>疾病 / 干预</span><b>→</b><span>申办方 / 医院</span><b>→</b><span>进度 / 结果</span>
+        </div>
+        <p>系统仅在存在完全一致的交叉注册编号时自动合并来源记录，不使用标题相似度强行合并，从而降低把不同研究误判为同一项目的风险。</p>
+      </section>
+    </section>
+
+    <section id="following-view" class="view container inner-view" data-view="following" hidden>
+      <header class="inner-header">
+        <div>
+          <p class="eyebrow">仅保存在当前浏览器</p>
+          <h1>我的关注</h1>
+          <p>收藏内容不会上传到服务器，也不会收集您的疾病或身份信息。打开本页时会尝试刷新已收藏试验的最新公开状态。</p>
+        </div>
+        <button id="refresh-favorites-button" class="secondary-button" type="button">刷新关注状态</button>
+      </header>
+      <div id="favorites-summary" class="following-summary"></div>
+      <div id="favorites-list" class="trial-list"></div>
+    </section>
+
+    <section id="guide-view" class="view container inner-view" data-view="guide" hidden>
+      <header class="inner-header guide-header">
+        <div>
+          <p class="eyebrow">阅读与使用边界</p>
+          <h1>如何正确理解临床试验公示信息</h1>
+          <p>本平台帮助整理公开登记字段，但不会判断任何人是否适合参加试验，也不替代医院、研究者或申办方的正式说明。</p>
+        </div>
+      </header>
+
+      <div class="guide-grid">
+        <article class="guide-card">
+          <span class="guide-number">01</span>
+          <h2>“招募中”不是入组承诺</h2>
+          <p>它表示登记记录的总体状态。某个具体医院可能尚未启动、已经停止招募，或联系方式尚未公开。</p>
+        </article>
+        <article class="guide-card">
+          <span class="guide-number">02</span>
+          <h2>“计划人数”不是实际人数</h2>
+          <p>只有官方字段明确标记为 Actual 时，才能理解为公开的实际入组人数；Estimated 表示计划值。</p>
+        </article>
+        <article class="guide-card">
+          <span class="guide-number">03</span>
+          <h2>试验分期不等于疗效等级</h2>
+          <p>分期主要反映研究所处的开发阶段和研究目的，不能简单解释为药物“更好”或“更差”。</p>
+        </article>
+        <article class="guide-card">
+          <span class="guide-number">04</span>
+          <h2>英文原文具有优先效力</h2>
+          <p>中文标签和通俗说明用于辅助理解。如与来源记录存在差异，应以该条记录对应的官方注册平台最新原始页面为准。</p>
+        </article>
+      </div>
+
+      <div class="policy-panel">
+        <h2>数据与隐私说明</h2>
+        <div class="policy-columns">
+          <div>
+            <h3>平台会做什么</h3>
+            <ul>
+              <li>访问时实时查询 ClinicalTrials.gov 公开 API。</li>
+              <li>对 WHO ICTRP、ChiCTR、国家医学研究登记备案和 NMPA 使用独立来源适配器。</li>
+              <li>把不同注册体系映射到统一研究实体，同时保留来源证据链。</li>
+              <li>在浏览器本地缓存最近成功查询的数据。</li>
+              <li>将收藏记录保存在当前浏览器本地。</li>
+            </ul>
+          </div>
+          <div>
+            <h3>平台不会做什么</h3>
+            <ul>
+              <li>不收集姓名、电话、病历或基因检测结果。</li>
+              <li>不进行资格筛选、智能匹配或一键报名。</li>
+              <li>不提供诊断、用药和治疗建议。</li>
+              <li>不保证公开联系人仍然有效。</li>
+              <li>不会在没有官方接口或合规快照时，通过网页抓取冒充“实时多源数据”。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <strong>Global + China Clinical Research Graph</strong>
+        <p>基于 ClinicalTrials.gov 公开登记数据进行结构化整理。</p>
+      </div>
+      <div class="footer-links">
+        <a href="#/sources">查看数据源覆盖</a>
+        <a href="#/guide">免责声明与隐私说明</a>
+        <button id="clear-local-data" class="footer-button" type="button">清除本地缓存与收藏</button>
+      </div>
+    </div>
+    <div class="container footer-disclaimer">
+      本网站仅聚合公开登记信息，不构成医疗建议、试验推荐、资格判断或报名保证。不同注册平台的更新时间和字段口径不同；请始终以对应来源的官方原始记录及研究机构正式通知为准。
+    </div>
+  </footer>
+
+  <div id="mobile-filter-drawer" class="drawer" aria-hidden="true">
+    <button class="drawer-backdrop" type="button" aria-label="关闭筛选面板"></button>
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <div class="drawer-header">
+        <h2 id="drawer-title">筛选公示记录</h2>
+        <button class="icon-button drawer-close" type="button" aria-label="关闭筛选面板">×</button>
+      </div>
+      <div id="mobile-filter-content"></div>
+      <div class="drawer-actions">
+        <button id="mobile-reset-filters" class="secondary-button" type="button">重置</button>
+        <button id="mobile-apply-filters" class="primary-button" type="button">查看结果</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-modal" class="modal" aria-hidden="true">
+    <button class="modal-backdrop" type="button" aria-label="关闭详情"></button>
+    <article class="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+      <header class="detail-sheet-header">
+        <div>
+          <span id="detail-nct" class="detail-nct">NCT</span>
+          <h2 id="detail-title">临床试验详情</h2>
+        </div>
+        <button class="icon-button modal-close" type="button" aria-label="关闭详情">×</button>
+      </header>
+      <div id="detail-content" class="detail-content"></div>
+    </article>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <noscript>
+    <div class="noscript">本网站需要启用 JavaScript 才能查询并整合公开临床研究数据。</div>
+  </noscript>
+
+  <script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>

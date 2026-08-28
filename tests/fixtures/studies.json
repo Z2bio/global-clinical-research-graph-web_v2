@@ -1,0 +1,107 @@
+{
+  "totalCount": 142,
+  "nextPageToken": "NEXT_TEST_TOKEN",
+  "studies": [
+    {
+      "protocolSection": {
+        "identificationModule": {
+          "nctId": "NCT01234567",
+          "briefTitle": "A Phase 3 Study in Advanced Non-Small Cell Lung Cancer",
+          "officialTitle": "A Randomized Phase 3 Study of Drug A in Advanced Non-Small Cell Lung Cancer"
+        },
+        "statusModule": {
+          "statusVerifiedDate": "2026-07",
+          "overallStatus": "RECRUITING",
+          "startDateStruct": { "date": "2025-01-15", "type": "ACTUAL" },
+          "primaryCompletionDateStruct": { "date": "2027-03-31", "type": "ESTIMATED" },
+          "completionDateStruct": { "date": "2027-06-30", "type": "ESTIMATED" },
+          "studyFirstSubmitDate": "2024-12-10",
+          "studyFirstPostDateStruct": { "date": "2024-12-20", "type": "ACTUAL" },
+          "lastUpdateSubmitDate": "2026-07-28",
+          "lastUpdatePostDateStruct": { "date": "2026-08-02", "type": "ACTUAL" }
+        },
+        "conditionsModule": {
+          "conditions": ["Non-Small Cell Lung Cancer", "EGFR Mutation"],
+          "keywords": ["lung cancer", "targeted therapy"]
+        },
+        "designModule": {
+          "studyType": "INTERVENTIONAL",
+          "phases": ["PHASE3"],
+          "enrollmentInfo": { "count": 200, "type": "ESTIMATED" }
+        },
+        "sponsorCollaboratorsModule": {
+          "leadSponsor": { "name": "Example Biopharma", "class": "INDUSTRY" },
+          "collaborators": [{ "name": "Example Medical Center", "class": "OTHER" }]
+        },
+        "armsInterventionsModule": {
+          "armGroups": [{ "label": "Experimental Arm", "type": "EXPERIMENTAL", "description": "Drug A every 3 weeks for 6 cycles." }],
+          "interventions": [{ "type": "DRUG", "name": "Drug A", "description": "Intravenous infusion every 3 weeks for 6 cycles.", "armGroupLabels": ["Experimental Arm"] }]
+        },
+        "descriptionModule": {
+          "briefSummary": "This study compares Drug A with standard treatment in advanced non-small cell lung cancer."
+        },
+        "contactsLocationsModule": {
+          "centralContacts": [{ "name": "Study Contact", "role": "CONTACT", "phone": "+1-555-0100", "email": "study@example.org" }],
+          "overallOfficials": [{ "name": "Jane Investigator", "affiliation": "Example Medical Center", "role": "PRINCIPAL_INVESTIGATOR" }],
+          "locations": [{
+            "facility": "Example Medical Center",
+            "status": "RECRUITING",
+            "city": "Boston",
+            "state": "Massachusetts",
+            "zip": "02115",
+            "country": "United States",
+            "contacts": [{ "name": "Local Contact", "role": "CONTACT", "phone": "+1-555-0101", "email": "local@example.org" }]
+          }]
+        },
+        "eligibilityModule": {
+          "eligibilityCriteria": "Inclusion Criteria:\n- Histologically confirmed non-small cell lung cancer.\n- Age 18 years or older.\nExclusion Criteria:\n- Uncontrolled infection.\n- Pregnancy.",
+          "healthyVolunteers": false,
+          "sex": "ALL",
+          "minimumAge": "18 Years",
+          "maximumAge": "75 Years"
+        },
+        "outcomesModule": {
+          "primaryOutcomes": [{ "measure": "Progression-Free Survival", "timeFrame": "Up to 36 months" }],
+          "secondaryOutcomes": [{ "measure": "Overall Survival", "timeFrame": "Up to 48 months" }]
+        }
+      },
+      "hasResults": false
+    },
+    {
+      "protocolSection": {
+        "identificationModule": {
+          "nctId": "NCT07654321",
+          "briefTitle": "Observational Study of Diabetes Care",
+          "officialTitle": "A Multicenter Observational Study of Diabetes Care"
+        },
+        "statusModule": {
+          "statusVerifiedDate": "2026-06",
+          "overallStatus": "COMPLETED",
+          "startDateStruct": { "date": "2021-01-01", "type": "ACTUAL" },
+          "completionDateStruct": { "date": "2025-12-31", "type": "ACTUAL" },
+          "studyFirstPostDateStruct": { "date": "2020-12-01", "type": "ACTUAL" },
+          "lastUpdatePostDateStruct": { "date": "2026-07-20", "type": "ACTUAL" }
+        },
+        "conditionsModule": { "conditions": ["Diabetes Mellitus"] },
+        "designModule": {
+          "studyType": "OBSERVATIONAL",
+          "enrollmentInfo": { "count": 1300, "type": "ACTUAL" }
+        },
+        "sponsorCollaboratorsModule": {
+          "leadSponsor": { "name": "University Hospital", "class": "OTHER" }
+        },
+        "contactsLocationsModule": {
+          "locations": [{ "facility": "University Hospital", "city": "London", "country": "United Kingdom" }]
+        },
+        "eligibilityModule": {
+          "eligibilityCriteria": "Adults with diabetes receiving routine care.",
+          "healthyVolunteers": false,
+          "sex": "ALL",
+          "minimumAge": "18 Years",
+          "maximumAge": "N/A"
+        }
+      },
+      "hasResults": true
+    }
+  ]
+}

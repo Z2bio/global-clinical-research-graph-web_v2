@@ -1,0 +1,15 @@
+{
+  "name": "全球 + 中国临床研究公开信息图谱",
+  "short_name": "临床研究图谱",
+  "description": "Global + China Clinical Research Graph：多源公开临床研究信息分层检索与来源证据链展示。",
+  "start_url": "./#/trials",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f8fc",
+  "theme_color": "#0b5cab",
+  "lang": "zh-CN",
+  "icons": [
+    {"src":"./assets/icon-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"},
+    {"src":"./assets/icon-512.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
