@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js'
+import { initI18n, translateDocument } from './i18n.js'
 import {
   CENTER_SCOPE_LABELS,
   DEVELOPMENT_STAGE_LABELS,
@@ -275,6 +276,13 @@ function renderResults() {
   renderFilterChips()
   renderStats()
   updateFavoriteBadge()
+  window.__CRG_PUBLIC_STATE__ = { studies: visible, allStudies: state.studies, filters: {
+    query: state.query, sourceKeys: [...state.sourceKeys], registrationPath: state.registrationPath, researchType: state.researchType,
+    statusCode: state.statusCode, developmentStage: state.developmentStage, country: state.country, sponsorClass: state.sponsorClass,
+    updatedWithinDays: state.updatedWithinDays, centerScope: state.centerScope, results: state.results, sortMode: state.sortMode
+  }}
+  document.dispatchEvent(new CustomEvent('crg:studies-updated', { detail: window.__CRG_PUBLIC_STATE__ }))
+  translateDocument(document.body)
 }
 
 function applyPayload(payload, { append = false, preview = false } = {}) {
@@ -832,14 +840,15 @@ function renderSourceCenter() {
 }
 
 function showView(route) {
-  const routeName = route.startsWith('following') ? 'following' : route.startsWith('sources') ? 'sources' : route.startsWith('guide') ? 'guide' : 'trials'
+  const routeName = route.startsWith('following') ? 'following' : route.startsWith('map') ? 'map' : route.startsWith('sources') ? 'sources' : route.startsWith('guide') ? 'guide' : 'trials'
   $$('.view').forEach((view) => { view.hidden = view.dataset.view !== routeName })
   $$('.desktop-nav a').forEach((link) => link.classList.toggle('active', link.dataset.nav === routeName))
   $('#mobile-menu').hidden = true
   $('#mobile-menu-button').setAttribute('aria-expanded', 'false')
   if (routeName === 'following') renderFavorites()
   if (routeName === 'sources') { renderSourceCenter(); ensureSnapshots().catch(() => renderSourceCenter()) }
-  if (routeName === 'trials' && !state.studies.length && !state.loading) runSearch()
+  if ((routeName === 'trials' || routeName === 'map') && !state.studies.length && !state.loading) runSearch()
+  if (routeName === 'map') document.dispatchEvent(new CustomEvent('crg:studies-updated', { detail: window.__CRG_PUBLIC_STATE__ || { studies: filteredStudies(), allStudies: state.studies } }))
 }
 
 function handleRoute() {
@@ -940,6 +949,7 @@ async function registerServiceWorker() {
 }
 
 function init() {
+  initI18n()
   bindEvents()
   updateFavoriteBadge()
   state.versionPromise = getApiVersion()

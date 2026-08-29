@@ -1,23 +1,21 @@
-# v2.1 测试报告
+# v2.2 Test Report
 
-自动化测试覆盖：
-
-1. ClinicalTrials.gov V2 标准化；
-2. 中文常见疾病检索词转换；
-3. 基础筛选与排序；
-4. ChiCTR 快照统一模型；
-5. 精确交叉注册编号合并；
-6. 图谱指标计算；
-7. NMPA 注册性路径默认分类；
-8. ChiCTR 不自动等同 IIT；
-9. 跨来源证据升级注册路径；
-10. Source / Registration Path / Research Type / Development Stage 四维独立；
-11. 合并研究按任一来源证据进行来源筛选；
-12. 本地存储降级。
-
-运行：
+执行：
 
 ```bash
-npm test
-npm run audit
+npm run check
 ```
+
+覆盖：
+
+- ClinicalTrials.gov v2 标准化。
+- 中文疾病查询转换。
+- 多源过滤与研究分类。
+- 浏览器本地存储降级。
+- geoPoint 经纬度保留。
+- 同一执行中心关联研究聚合。
+- 地图研究数 / 可定位研究数 / 执行中心数统计。
+- GitHub Pages 必需文件和 DOM ID 审计。
+- v2.2 研究地图、语言切换模块存在性检查。
+
+高德 JS API 的真实底图加载需要使用者自己的 Web(JS API) Key，因此自动化测试不包含真实 Key 联网调用。

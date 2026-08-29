@@ -1,115 +1,50 @@
-# Global + China Clinical Research Graph v2.1.0
+# Global + China Clinical Research Graph v2.2.1
 
-面向普通用户、医生、研究者和行业人员的 **全球 + 中国临床研究公开信息图谱**。
+面向中国客户的全球 + 中国临床研究公开信息图谱。v2.2 在 v2.1 多源研究模型上新增 **研究地图 / Research Map**，并提供 **中文 / English UI** 切换。
 
-本版在 v2.0 四层数据源架构上，重点升级了“研究分类体系”和筛选逻辑，避免把 **数据来源、IIT/注册性、研究类型、药物试验阶段** 混成一个维度。
+## v2.2.1 小版本修复
 
-## 四层数据源
+- 桌面端左侧“结构化筛选”改为 **sticky + 独立纵向滚动**。
+- 右侧公示结果再长，左侧筛选都可在当前视口内完整滚动查看，无需先滚到页面底部。
+- 保留移动端筛选抽屉逻辑，不改变 v2.2 的地图、双语、多源筛选和联动功能。
+- 增加稳定滚动槽与可见滚动条样式，便于 Mac/Windows 用户识别该区域可滚动。
 
-1. **Layer 1｜全球主注册层**：ClinicalTrials.gov
-2. **Layer 2｜全球跨注册中心层**：WHO ICTRP
-3. **Layer 3｜中国广义临床研究层**：ChiCTR + 国家医学研究登记备案信息系统
-4. **Layer 4｜中国药物注册监管层**：NMPA 药物临床试验登记与信息公示平台
 
-## v2.1 的四维分类模型
+## v2.2 新增能力
 
-每条研究记录至少保留以下四个相互独立的维度：
+1. 左侧研究结果列表 + 右侧地图联动。
+2. 执行医院/研究中心点位聚合展示。
+3. 数据来源、研究类型、研究发起/注册路径、公开状态、国家/地区筛选与地图同步。
+4. 点击地图医院/中心，查看其关联研究。
+5. 点击研究卡片，自动定位到其公开执行中心。
+6. 为后续 `Study → Disease → Sponsor → Facility → Source` 关系图谱预留入口。
+7. 中文 / English 界面切换；研究标题和医学内容优先保留登记源原文，避免未经审核的自动医学翻译造成信息偏差。
+8. 中国优先地图模式：正式中国地图优先使用高德地图 JS API；未配置 Key 时自动退化为“坐标分布预览”，不会偷偷加载境外第三方底图。
 
-```text
-Source 数据来源
-├── ClinicalTrials.gov
-├── WHO ICTRP
-├── ChiCTR
-├── 国家医学研究登记备案
-└── NMPA
+## 中国场景适配
 
-Registration Path 研究发起/注册路径
-├── 药品注册性试验
-├── IIT / 研究者发起研究
-├── 其他非注册性临床研究
-└── 暂无法判定
+- 地图默认“中国优先”，同时保留“全球视图”。
+- 数据模型继续区分：`Source / 注册路径 / Research Type / Development Stage`。
+- 中国来源保留：ChiCTR、国家医学研究登记备案、NMPA。
+- ClinicalTrials.gov 的公开 `geoPoint` 被保留用于执行中心定位。
+- 对中国境内 WGS84/GPS 坐标，在高德地图模式下通过 `AMap.convertFrom(..., 'gps')` 转为高德坐标后再展示。
+- 不读取用户实时位置，不收集患者位置或健康信息。
 
-Research Type 研究类型
-├── 干预性
-├── 观察性
-├── 诊断
-├── 预后
-├── 病因/相关因素
-├── 流行病学
-├── 预防
-├── 筛查
-├── 卫生服务
-└── 其他
+## 数据源现状
 
-Drug Development Stage 药物开发/试验阶段
-├── Early Phase I
-├── I / I-II / II / II-III / III / IV
-├── BE
-├── PK
-├── 不适用
-└── 未公开
-```
+| 来源 | 当前模式 |
+| --- | --- |
+| ClinicalTrials.gov | 访问时实时 API |
+| WHO ICTRP | 标准化快照/待官方授权接口 |
+| ChiCTR | 标准化快照/待正式数据接入 |
+| 国家医学研究登记备案 | 标准化快照/待正式数据接入 |
+| NMPA | 标准化快照/待正式数据接入 |
 
-**IIT 不是“研究分期”。** 因此 v2.1 不会把 IIT 放进 I/II/III/IV 的下拉框。
+> v2.2 不通过未经授权的网页抓取伪装成“多源实时同步”。
 
-## 真实性规则
+## 直接部署 GitHub Pages
 
-### ClinicalTrials.gov
-
-仍通过 API V2 在用户访问时查询，并使用浏览器本地缓存降级。
-
-但 ClinicalTrials.gov 记录本身 **不会被自动判断为“药品注册性试验”或“IIT”**。如果没有 NMPA、ChiCTR、备案等明确交叉证据，统一显示：
-
-> 注册路径暂无法判定
-
-### NMPA
-
-通过 NMPA 快照适配器进入系统的记录，默认归入：
-
-> 药品注册性试验
-
-并可使用 `developmentStageCode` 标记 `BE`、`PK`、`PHASE1` 等阶段。
-
-### ChiCTR
-
-ChiCTR 记录 **不会因为来自 ChiCTR 就自动等同为 IIT**。只有导入数据明确提供：
-
-```json
-"registrationPathCode": "IIT"
-```
-
-才显示为 IIT。
-
-### 国家医学研究登记备案
-
-默认归入“其他非注册性临床研究”；只有导入数据明确标记 IIT 时才进一步归入 IIT。
-
-## 新版筛选项
-
-左侧结构化筛选包括：
-
-- 数据来源（多选）
-- 研究发起 / 注册路径
-- 研究类型
-- 公开状态
-- 药物开发 / 试验阶段
-- 执行国家/地区
-- 申办方 / 主办单位类型
-- 最近公开更新时间
-- 更多筛选：单/多中心、是否已有结果登记
-- 当前页排序
-
-## 多源合并
-
-系统只在存在 **完全一致的交叉注册编号** 时自动合并。
-
-当 ClinicalTrials.gov 记录本身“注册路径未知”，但合并到明确的 NMPA 记录时，可以由 NMPA 证据把该 Canonical Study 的注册路径升级为“药品注册性试验”。
-
-如果两个来源对同一分类维度给出冲突值，系统保留冲突标记，不靠标题相似度强制消解。
-
-## GitHub Pages 部署
-
-直接把本目录的全部文件覆盖到原 GitHub 仓库根目录：
+把本目录全部文件覆盖到现有 GitHub 仓库根目录：
 
 ```text
 index.html
@@ -130,48 +65,54 @@ sw.js
 GitHub Desktop
 → Commit to main
 → Push origin
+→ GitHub Pages 自动重新构建
 ```
 
-如果原仓库 Pages 已配置为：
+## 配置中国地图
+
+打开：
 
 ```text
-Settings → Pages
-Deploy from a branch
-main / (root)
+assets/js/config.js
 ```
 
-无需重新配置。
+填写：
 
-> v2.1 已更换 Service Worker 缓存版本。发布后如第一次看到旧页面，强制刷新一次即可让新缓存接管。
+```js
+map: {
+  provider: 'amap',
+  amapKey: 'YOUR_AMAP_WEB_JS_KEY',
+  amapSecurityJsCode: 'YOUR_SECURITY_JSCODE',
+  ...
+}
+```
+
+未填写 Key 时，网页仍可运行，但地图区域显示 **坐标分布预览（不是正式底图）**。
+
+### GitHub Pages 演示与正式生产的区别
+
+纯 GitHub Pages 无法安全隐藏高德安全密钥。开发/演示阶段可以使用前端配置；正式生产建议按高德官方“JS API 安全密钥”文档，通过代理服务器保存安全密钥。
+
+详见：`docs/MAP_SETUP_CN.md`。
+
+## English UI
+
+顶部 `中文 / EN` 可切换界面语言。
+
+- UI 标签、筛选和地图模块支持中英文切换。
+- 官方研究标题、入排标准、研究方案等医疗内容优先保留原注册平台语言。
+- 如果未来导入 ChiCTR/NMPA 的中英文字段，可在标准化快照中使用 `zhTitle / enTitle` 扩展双语内容。
+- 高德英文底图属于单独的多语言地图能力；默认配置不假设已经开通该权限。
 
 ## 本地检查
 
 ```bash
 npm test
 npm run audit
-python3 -m http.server 8080
+npm run check
 ```
 
-## 多源快照
+## 版本
 
-```text
-data/
-├── who-ictrp.json
-├── chictr.json
-├── nmrr.json
-├── nmpa.json
-└── README.md
-```
-
-当前 WHO ICTRP、ChiCTR、国家医学研究登记备案、NMPA 的 JSON 默认仍为空，不伪装成已实时接通。获得官方授权接口、官方导出或合规 ETL 数据后，按统一结构写入即可。
-
-## 使用边界
-
-本项目：
-
-- 仅整理公开研究登记信息；
-- 不收集姓名、电话、病历或基因检测信息；
-- 不做患者资格判断；
-- 不提供一键报名；
-- 不提供诊断、治疗或用药建议；
-- 所有信息应可回链到官方来源核验。
+- Baseline: v2.1.0 Global + China Clinical Research Graph
+- Current: **v2.2.1 Research Map**

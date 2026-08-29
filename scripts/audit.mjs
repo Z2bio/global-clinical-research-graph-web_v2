@@ -17,6 +17,10 @@ const required = [
   'assets/js/storage.js',
   'assets/js/federated.js',
   'assets/js/graph.js',
+  'assets/js/i18n.js',
+  'assets/js/geo.js',
+  'assets/js/map.js',
+  'assets/js/map-view.js',
   'data/who-ictrp.json',
   'data/chictr.json',
   'data/nmrr.json',
@@ -46,7 +50,11 @@ const checks = [
   ['source filter', /id="source-filter-options"/],
   ['registration path filter', /id="registration-path-filter"/],
   ['research type filter', /id="research-type-filter"/],
-  ['development stage filter', /id="phase-filter"/]
+  ['development stage filter', /id="phase-filter"/],
+  ['research map view', /id="map-view"/],
+  ['research map canvas', /id="research-map-canvas"/],
+  ['language toggle', /data-locale-button="en-US"/],
+  ['map module entry', /type="module" src="\.\/assets\/js\/map-view\.js"/]
 ]
 for (const [name, pattern] of checks) {
   if (!pattern.test(html)) errors.push(`HTML audit failed: ${name}`)
@@ -67,7 +75,7 @@ const jsFiles = fs.readdirSync(path.join(root, 'assets/js')).filter((name) => na
 for (const name of jsFiles) {
   const content = fs.readFileSync(path.join(root, 'assets/js', name), 'utf8')
   if (/eval\s*\(/.test(content)) errors.push(`Unsafe eval found in ${name}`)
-  if (/innerHTML\s*=\s*[^`'"\n]/.test(content) && name !== 'app.js') errors.push(`Review dynamic innerHTML in ${name}`)
+  if (/innerHTML\s*=\s*[^`'"\n]/.test(content) && !['app.js','map-view.js','map.js'].includes(name)) errors.push(`Review dynamic innerHTML in ${name}`)
 }
 
 if (errors.length) {

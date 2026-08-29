@@ -1,6 +1,6 @@
 {
   "name": "全球 + 中国临床研究公开信息图谱",
-  "short_name": "临床研究图谱",
+  "short_name": "临床研究图谱 · 研究地图",
   "description": "Global + China Clinical Research Graph：多源公开临床研究信息分层检索与来源证据链展示。",
   "start_url": "./#/trials",
   "scope": "./",

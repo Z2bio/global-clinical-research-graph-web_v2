@@ -32,12 +32,17 @@
 
       <nav class="desktop-nav" aria-label="主导航">
         <a href="#/trials" data-nav="trials">公示列表</a>
+        <a href="#/map" data-nav="map">研究图谱</a>
         <a href="#/sources" data-nav="sources">数据源覆盖</a>
         <a href="#/following" data-nav="following">我的关注 <span id="favorite-count-badge" class="nav-badge" hidden>0</span></a>
         <a href="#/guide" data-nav="guide">阅读说明</a>
       </nav>
 
       <div class="header-actions">
+        <div class="locale-switch" role="group" aria-label="Language / 语言">
+          <button type="button" data-locale-button="zh-CN">中文</button>
+          <button type="button" data-locale-button="en-US">EN</button>
+        </div>
         <button id="refresh-button" class="icon-button" type="button" title="重新同步最新数据" aria-label="重新同步最新数据">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.7-4.7L3 9m0 0V4m0 5h5m-4 4a8.1 8.1 0 0 0 14.7 4.7L21 15m0 0v5m0-5h-5"/></svg>
         </button>
@@ -48,6 +53,7 @@
     </div>
     <nav id="mobile-menu" class="mobile-menu container" aria-label="移动端导航" hidden>
       <a href="#/trials">公示列表</a>
+      <a href="#/map">研究图谱</a>
       <a href="#/sources">数据源覆盖</a>
       <a href="#/following">我的关注</a>
       <a href="#/guide">阅读说明</a>
@@ -301,6 +307,103 @@
       </div>
     </section>
 
+    <section id="map-view" class="view map-view" data-view="map" hidden>
+      <div class="map-page-toolbar container">
+        <div class="map-page-title">
+          <p class="eyebrow" data-i18n="mapMode">地图模式</p>
+          <h1 data-i18n="mapTitle">临床研究分布图谱</h1>
+          <p data-i18n="mapSubtitle">以公开登记的执行中心坐标为基础，联动研究列表、医院/中心与来源证据。</p>
+        </div>
+        <div class="map-mode-switch" role="group" aria-label="Map scope">
+          <button id="map-view-mode-china" class="active" type="button" data-i18n="chinaFirst">中国优先</button>
+          <button id="map-view-mode-world" type="button" data-i18n="worldView">全球视图</button>
+        </div>
+      </div>
+
+      <div class="map-search-strip container">
+        <form id="map-search-form" class="map-search-form" role="search">
+          <label>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+            <input id="map-search-input" type="search" maxlength="160" data-i18n-placeholder="mapSearchPlaceholder" placeholder="输入疾病、医院、药企/发起方或注册编号">
+          </label>
+          <button class="primary-button" type="submit" data-i18n="search">搜索</button>
+        </form>
+        <div class="map-inline-filters">
+          <details class="map-source-filter">
+            <summary data-i18n="source">数据来源</summary>
+            <div id="map-source-options" class="map-source-options"></div>
+          </details>
+          <select id="map-registration-path-filter" aria-label="研究发起 / 注册路径">
+            <option value="">全部路径</option>
+            <option value="REGULATORY_DRUG">药品注册性试验</option>
+            <option value="IIT">IIT / 研究者发起研究</option>
+            <option value="NON_REG">其他非注册性临床研究</option>
+            <option value="UNKNOWN">注册路径暂无法判定</option>
+          </select>
+          <select id="map-research-type-filter" aria-label="研究类型">
+            <option value="">全部研究类型</option>
+            <option value="INTERVENTIONAL">干预性研究</option>
+            <option value="OBSERVATIONAL">观察性研究</option>
+            <option value="DIAGNOSTIC">诊断研究</option>
+            <option value="PROGNOSTIC">预后研究</option>
+            <option value="EPIDEMIOLOGIC">流行病学研究</option>
+            <option value="OTHER">其他研究</option>
+            <option value="UNKNOWN">研究类型未公开</option>
+          </select>
+          <select id="map-status-filter" aria-label="公开状态">
+            <option value="">全部状态</option>
+            <option value="RECRUITING">招募中</option>
+            <option value="NOT_YET_RECRUITING">尚未招募</option>
+            <option value="ACTIVE_NOT_RECRUITING">进行中，不再招募</option>
+            <option value="SUSPENDED">暂停</option>
+            <option value="COMPLETED">已完成</option>
+            <option value="TERMINATED">已终止</option>
+          </select>
+          <select id="map-country-filter" aria-label="国家/地区"><option value="">全部国家/地区</option></select>
+          <button id="map-reset-filters" class="secondary-button compact" type="button" data-i18n="reset">重置</button>
+        </div>
+      </div>
+
+      <div class="map-kpi-row container">
+        <div><span data-i18n="studyCount">当前研究</span><strong id="map-study-count">0</strong></div>
+        <div><span data-i18n="locatedStudyCount">有坐标研究</span><strong id="map-located-study-count">0</strong></div>
+        <div><span data-i18n="facilityCount">可定位执行中心</span><strong id="map-facility-count">0</strong></div>
+        <p data-i18n="listMapHint">点击左侧研究卡片可定位到其执行中心；点击地图中心可查看关联研究。</p>
+      </div>
+
+      <div class="map-workspace">
+        <aside class="map-results-pane">
+          <div class="map-pane-head">
+            <div><span class="panel-kicker">Study list</span><h2 data-i18n="linkedStudies">关联研究</h2></div>
+            <a href="#/trials" class="text-button" data-i18n="navTrials">公示列表</a>
+          </div>
+          <div id="map-study-list" class="map-study-list" aria-live="polite"></div>
+        </aside>
+        <section class="map-canvas-pane" aria-label="Clinical research map">
+          <div id="research-map-canvas" class="research-map-canvas"></div>
+          <div id="map-provider-status" class="map-provider-status" aria-live="polite"></div>
+          <div id="map-no-coordinate-note" class="map-no-coordinate-note" hidden data-i18n="noCoordinates">当前筛选结果暂无可用于地图定位的公开坐标。</div>
+          <aside id="map-facility-panel" class="map-facility-panel" hidden></aside>
+          <div class="map-compliance-note">
+            <span>ⓘ</span>
+            <p><b data-i18n="originalContent">研究标题和医学内容优先保留登记源原文；界面语言可中英文切换。</b><br><span data-i18n="mapCompliance">中国境内正式展示建议使用依法合规的互联网地图服务，不隐藏地图服务商标识与审图信息。</span></p>
+          </div>
+        </section>
+      </div>
+
+      <section class="relation-graph-reserved container">
+        <div>
+          <p class="panel-kicker">Graph roadmap</p>
+          <h2 data-i18n="relationGraph">关系图谱</h2>
+          <p>Study → Disease → Sponsor → Facility → Source</p>
+        </div>
+        <span class="reserved-pill" data-i18n="reserved">已预留 · 后续版本</span>
+        <div class="relation-preview" aria-hidden="true">
+          <span>Disease</span><i></i><strong>Study</strong><i></i><span>Sponsor</span><i></i><span>Facility</span><i></i><span>Source</span>
+        </div>
+      </section>
+    </section>
+
     <section id="sources-view" class="view container inner-view" data-view="sources" hidden>
       <header class="inner-header source-view-header">
         <div>
@@ -462,5 +565,6 @@
   </noscript>
 
   <script type="module" src="./assets/js/app.js"></script>
+  <script type="module" src="./assets/js/map-view.js"></script>
 </body>
 </html>

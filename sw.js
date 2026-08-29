@@ -1,9 +1,9 @@
-const CACHE_NAME = 'clinical-research-graph-shell-v2.1.0'
+const CACHE_NAME = 'clinical-research-graph-shell-v2.2.1'
 const APP_SHELL = [
   './', './index.html', './assets/css/styles.css',
   './assets/js/app.js', './assets/js/api.js', './assets/js/config.js',
   './assets/js/dictionary.js', './assets/js/normalizer.js', './assets/js/storage.js',
-  './assets/js/federated.js', './assets/js/graph.js',
+  './assets/js/federated.js', './assets/js/graph.js', './assets/js/i18n.js', './assets/js/geo.js', './assets/js/map.js', './assets/js/map-view.js',
   './assets/favicon.svg', './manifest.webmanifest'
 ]
 

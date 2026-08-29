@@ -1,45 +1,53 @@
-Global + China Clinical Research Graph v2.1.0
-Generated: 2026-08-28
+Global + China Clinical Research Graph v2.2.1
+Research Map / China-first bilingual release
 
-./.github/workflows/deploy-pages.yml
-./.nojekyll
-./404.html
-./LICENSE
-./README.md
-./assets/css/styles.css
-./assets/favicon.svg
-./assets/icon-192.svg
-./assets/icon-512.svg
-./assets/js/api.js
-./assets/js/app.js
-./assets/js/config.js
-./assets/js/dictionary.js
-./assets/js/federated.js
-./assets/js/graph.js
-./assets/js/normalizer.js
-./assets/js/storage.js
-./assets/og-card.svg
-./data/README.md
-./data/chictr.json
-./data/nmpa.json
-./data/nmrr.json
-./data/who-ictrp.json
-./docs/API_FIELD_MAPPING.md
-./docs/ARCHITECTURE.md
-./docs/DATA_SOURCE_MATRIX.md
-./docs/DEPLOYMENT.md
-./docs/TEST_REPORT.md
-./docs/UPGRADE_NOTES_V2.1.md
-./docs/UPGRADE_NOTES_V2.md
-./docs/VALIDATION_REPORT.md
-./index.html
-./manifest.webmanifest
-./package.json
-./robots.txt
-./scripts/audit.mjs
-./sw.js
-./tests/federated.test.mjs
-./tests/fixtures/studies.json
-./tests/fixtures/version.json
-./tests/normalizer.test.mjs
-./tests/storage.test.mjs
+FILE	BYTES	SHA256
+.github/workflows/deploy-pages.yml	714	19a4cc7d70556cac33e224e4f2789666328fc5159b8daf669c48265e5989307e
+.nojekyll	0	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+404.html	31043	1e120cebdccbe08b68dbd4499ea49e5bcb9f0e61d2e6184ebf9d21c6162d14b3
+LICENSE	1056	1126322e2cc8d165adc4c792eeb195717de2bcc7b39be1ce77959d78e87ef685
+README.md	3545	feed6d87381f215fcd65018d97b7de876b93b09b9acbef0db70a776fdf142daa
+assets/css/styles.css	45652	70e39b253b1af2b53de3f02ed01bddd6613dbd5d1e42f3afc3f53c6432edc4cf
+assets/favicon.svg	592	f9648e2459b26916af143f301fc9d7ca3e44f0608f67512c6f6417a1632e30b9
+assets/icon-192.svg	592	f9648e2459b26916af143f301fc9d7ca3e44f0608f67512c6f6417a1632e30b9
+assets/icon-512.svg	592	f9648e2459b26916af143f301fc9d7ca3e44f0608f67512c6f6417a1632e30b9
+assets/js/api.js	4205	1fc63787fc24291a8b9dead01263a0facfc74530a871d861fa0ad9780525ddcf
+assets/js/app.js	52030	b67dbadabb46205717fa39d5ee673b674f5b69fad36cdf408d32a308429f03cb
+assets/js/config.js	1419	e065ce0a70052e924d81d40d3f5bb53efa6f9a318433d288a22ceed6f4101079
+assets/js/dictionary.js	5715	538f7d3e80e38add66882e282fb6d1e6b6758350518915508e9e263cdba45d8f
+assets/js/federated.js	13963	6c5863badd3755531e1b4dd3a5dde17aeaa37b614f0443b38921d8570abde7be
+assets/js/geo.js	2806	2104646828846d63f5dfba894d4c301339f68dcb3a6a7c082a8b325952e434b0
+assets/js/graph.js	3693	d8961ce5f203c06b28b5a72061c0e8dde3b9c3b7718d0c34b6aba8eca991cf04
+assets/js/i18n.js	11816	c3e90d7b1fd0970308f664e3360521e91d3ec231312244b35552ce2fe08e4e79
+assets/js/map-view.js	9776	0066d5ad07c1bc5c540cd48f2920ecc48b2ada2047d595541a78f6320dcf7509
+assets/js/map.js	11777	f666c746d8b8a7c158db7386c64a4b26ea784e8d59627d0711c89ff267aa95fd
+assets/js/normalizer.js	17556	f7a1f4efcb34949858425db528065c23e3ece0f01caf381216660a0486ba3ede
+assets/js/storage.js	3111	4133a2a904e80d6151b9d38c3f42e59c606420d807b82553e759a7d99bd18946
+assets/og-card.svg	1633	ea2da820e9f083851f78fe40e7967c7b5f93700224b57b7756552c8d62e75fce
+data/README.md	2004	bb3448896e1cbb88193e6a3de9b52ba67612ca194d7e193d30105c6fcad32ac7
+data/chictr.json	224	3383e24730ccca8a5749616b5139e313be8d4fc61b16aed661e51827653804d7
+data/nmpa.json	224	3383e24730ccca8a5749616b5139e313be8d4fc61b16aed661e51827653804d7
+data/nmrr.json	224	3383e24730ccca8a5749616b5139e313be8d4fc61b16aed661e51827653804d7
+data/who-ictrp.json	224	3383e24730ccca8a5749616b5139e313be8d4fc61b16aed661e51827653804d7
+docs/API_FIELD_MAPPING.md	1916	9fbd9a6f38fbcab0adb1e007703055d593f243f0cc39f385c64da92eb6b65814
+docs/ARCHITECTURE.md	2041	7c51bc42c26a22e7e8d39b6473e6f366546e07c6414b59117eb1ed6ec6bf96ee
+docs/DATA_SOURCE_MATRIX.md	4213	bc27b41ce9ab142a9c99b11f608c318f46405e5ea6b31272fe4d6321d2277696
+docs/DEPLOYMENT.md	827	7471f49292fa71774fbb36b82ef4d4dcd19b2fe50e0c4928e9070ecb40f52263
+docs/MAP_SETUP_CN.md	2284	6da404d5a79d904663021f3a032449f9f6b65402ad9a34eda369d3e4a4ca8b3b
+docs/TEST_REPORT.md	583	94be492412fc0fbea822d2d64968d2b25025dfeb8eb5d59938e703b322689828
+docs/UPGRADE_NOTES_V2.1.md	889	46269a205903bfc31c67fbec7849858a9a6e8ec4a8c59c4dd94f50197b744163
+docs/UPGRADE_NOTES_V2.2.md	995	97dafa1f3bd8df4e4d30c947f31724acde8976624965a4e576e19f2be906a081
+docs/UPGRADE_NOTES_V2.md	723	50fcf528a2be0df3ba9a2b7951e66a8e71ba20c59f7071bcceb8bcabb0660e26
+docs/VALIDATION_REPORT.md	765	4a62d208e221bb3b4e8a65540847f1d74d36e3e9cc74d1d5479f8de6a82caf05
+index.html	31043	1e120cebdccbe08b68dbd4499ea49e5bcb9f0e61d2e6184ebf9d21c6162d14b3
+manifest.webmanifest	623	0f1f05f33b12acc70328d89b2f7142829fda24c2f983ab6df314e8b8ed74cb06
+package.json	482	8b55534cd1ede6c31f7d7526f1b86f95017fc75232d7fddd69204d0a4d95f6a7
+robots.txt	23	16ceb5ee3e0dc13aa9adf31a3ebbe45a1d965b8c2b9f72eaf84e5911e140ed95
+scripts/audit.mjs	3450	ea053038414e4d5e98cfba1bd51561fa72411b615aa62a1e75a62234a60222e7
+sw.js	1710	92b98fc70132a6aac4fe0fbb49cd71a145ddb2089a1963c74e0197745510b821
+tests/federated.test.mjs	5922	9b2a7cacd3874a4e6c99f2ae48080eb54f3b2bee808c2d80a14cca11d5638845
+tests/fixtures/studies.json	6526	0f597703202dbd90d15edae5f24fa8e9ba21b9324cfb10de7b430fc03ac5303b
+tests/fixtures/version.json	70	f31385aa09b459fd86b5b1430bc48d016e6f9a6310228071646710043396bde9
+tests/geo.test.mjs	1562	280c984901e595ab54e6c184d22ccf4a0d1e2d5393f5fc82a07fd46d7b360f56
+tests/normalizer.test.mjs	2622	86e65780aa44dd4051bd44deb30a1c9257d7af840e5ab402ad69b3bd1b4ea888
+tests/storage.test.mjs	747	940e3518c8f498224b2abf2798060918f1a9e7dde785e1804420751951b8d8ed
