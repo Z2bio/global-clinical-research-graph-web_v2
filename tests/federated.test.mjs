@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { normalizeSnapshotRecord, filterSnapshotStudies, annotateClinicalTrialsStudy } from '../assets/js/federated.js'
 import { mergeExactCrossRegistrations, computeGraphMetrics } from '../assets/js/graph.js'
+import { matchesClientFilters } from '../assets/js/normalizer.js'
 
 test('normalizes a ChiCTR snapshot record into the shared study model', () => {
   const study = normalizeSnapshotRecord({
@@ -51,4 +52,54 @@ test('filters snapshot studies client-side and computes graph metrics', () => {
   assert.equal(metrics.studies, 2)
   assert.equal(metrics.sponsors, 2)
   assert.equal(metrics.institutions, 2)
+})
+
+test('classifies NMPA as regulatory drug path but does not auto-label ChiCTR as IIT', () => {
+  const nmpa = normalizeSnapshotRecord({
+    id: 'CTR20260001', title: 'BE study', stageCode: 'BE', studyType: 'INTERVENTIONAL'
+  }, 'nmpa')
+  assert.equal(nmpa.registrationPathCode, 'REGULATORY_DRUG')
+  assert.equal(nmpa.developmentStageCode, 'BE')
+
+  const chictrUnknown = normalizeSnapshotRecord({ id: 'ChiCTR26000001', title: 'Hospital study' }, 'chictr')
+  assert.equal(chictrUnknown.registrationPathCode, 'UNKNOWN')
+
+  const chictrIit = normalizeSnapshotRecord({
+    id: 'ChiCTR26000002', title: 'Investigator study', registrationPathCode: 'IIT', researchTypeCode: 'DIAGNOSTIC'
+  }, 'chictr')
+  assert.equal(chictrIit.registrationPathLabel, 'IIT / 研究者发起研究')
+  assert.equal(chictrIit.researchTypeLabel, '诊断研究')
+})
+
+test('cross-registration evidence can upgrade an unknown CTG registration path', () => {
+  const ctg = annotateClinicalTrialsStudy({
+    nctId: 'NCT00000001', identifiers: {}, sourceRecordUrl: 'https://clinicaltrials.gov/study/NCT00000001',
+    dates: { lastUpdatePosted: '2026-08-28' }, sponsor: { name: 'A' }, facilities: [], conditions: [],
+    registrationPathCode: 'UNKNOWN', registrationPathLabel: '注册路径暂无法判定', registrationPathNote: 'CTG alone cannot decide',
+    researchTypeCode: 'INTERVENTIONAL', researchTypeLabel: '干预性研究', developmentStageCode: 'PHASE3', developmentStageLabel: 'Ⅲ期',
+    centerScopeCode: 'UNKNOWN', centerScopeLabel: '中心范围未公开'
+  })
+  const nmpa = normalizeSnapshotRecord({
+    id: 'CTR20260002', identifiers: { nmpa: 'CTR20260002', clinicaltrials: 'NCT00000001' }, title: 'Same study'
+  }, 'nmpa')
+  const [merged] = mergeExactCrossRegistrations([ctg, nmpa])
+  assert.equal(merged.registrationPathCode, 'REGULATORY_DRUG')
+  assert.equal(merged.sourceRecords.length, 2)
+})
+
+
+test('source filters match any evidence source on a merged study', () => {
+  const ctg = annotateClinicalTrialsStudy({
+    nctId: 'NCT00000003', identifiers: {}, sourceRecordUrl: 'https://clinicaltrials.gov/study/NCT00000003',
+    dates: { lastUpdatePosted: '2026-08-28' }, sponsor: { name: 'A' }, facilities: [], conditions: [],
+    registrationPathCode: 'UNKNOWN', registrationPathLabel: '注册路径暂无法判定',
+    researchTypeCode: 'INTERVENTIONAL', researchTypeLabel: '干预性研究', developmentStageCode: 'PHASE2', developmentStageLabel: 'Ⅱ期',
+    centerScopeCode: 'UNKNOWN', centerScopeLabel: '中心范围未公开'
+  })
+  const chictr = normalizeSnapshotRecord({
+    id: 'ChiCTR26000003', identifiers: { chictr: 'ChiCTR26000003', clinicaltrials: 'NCT00000003' }, title: 'Same study', registrationPathCode: 'IIT'
+  }, 'chictr')
+  const [merged] = mergeExactCrossRegistrations([ctg, chictr])
+  assert.equal(matchesClientFilters(merged, { sourceKeys: ['chictr'] }), true)
+  assert.equal(matchesClientFilters(merged, { sourceKeys: ['nmpa'] }), false)
 })

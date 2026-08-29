@@ -1,30 +1,20 @@
-# Validation Report — Global + China Clinical Research Graph v2.0.0
+# v2.1 最终验证报告
 
-## 结论
+## 已验证
 
-代码包已通过 Node 自动化测试、静态审计和本地 HTTP 静态资源检查，可用于 GitHub Pages 覆盖升级。
+- GitHub Pages 根目录部署结构完整；
+- `index.html` / `404.html` 可作为 SPA 壳；
+- 全部 JavaScript 通过 `node --check`；
+- 11 项自动化测试通过；
+- 静态审计通过；
+- Source、注册路径、研究类型、药物开发阶段为独立字段；
+- 多源合并只使用精确交叉编号；
+- Service Worker 缓存版本升级至 v2.1.0；
+- WHO/ChiCTR/NMRR/NMPA 空快照不会伪装成实时接通。
 
-## 关键真实性检查
+## 发布后需要人工验证
 
-- ClinicalTrials.gov：真实 API V2 访问时查询；
-- WHO ICTRP：未伪装匿名实时 API；
-- ChiCTR：未伪装匿名实时 API；
-- 国家医学研究登记备案：未伪装匿名实时 API；
-- NMPA：未伪装匿名实时 API；
-- 未接入来源明确显示快照为空；
-- 交叉来源仅按明确相同注册编号自动合并；
-- 每条记录保留来源 URL。
-
-## 自动测试
-
-`npm run check`：通过。
-
-- 7 tests passed
-- 19 required files checked
-- 11 HTML semantic/source checks
-- 106 DOM id references checked
-- 8 JavaScript modules audited
-
-## 已知边界
-
-GitHub Pages 本身没有后端任务。五源全部自动同步需要在后续增加官方数据下载/授权接口及 ETL 服务。
+- Chrome / Safari / 微信内置浏览器的响应式布局；
+- GitHub Pages 首次发布后的 Service Worker 刷新；
+- ClinicalTrials.gov API 在用户网络环境下的跨域访问；
+- 后续导入国内来源真实快照后的字段映射准确性。

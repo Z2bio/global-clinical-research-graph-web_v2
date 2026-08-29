@@ -1,10 +1,10 @@
-# 多源快照目录
+# 多源快照标准 v2.1
 
-该目录用于承载 **WHO ICTRP / ChiCTR / 国家医学研究登记备案 / NMPA** 的合规数据快照。
+该目录用于承载 WHO ICTRP / ChiCTR / 国家医学研究登记备案 / NMPA 的合规数据快照。
 
-默认四个 JSON 文件为空。原因是这些来源目前并非都提供可供匿名 GitHub Pages 前端直接调用的公开 REST API。本项目不会通过未授权网页抓取来伪装“实时多源覆盖”。
+默认 JSON 为空。本项目不会通过未授权网页抓取伪装“实时多源覆盖”。
 
-## 标准记录最小字段
+## 推荐标准记录
 
 ```json
 {
@@ -16,21 +16,56 @@
   },
   "title": "研究标题",
   "statusCode": "RECRUITING",
+
+  "registrationPathCode": "IIT",
+  "registrationPathNote": "来源材料明确标记为研究者发起研究",
+
+  "researchTypeCode": "INTERVENTIONAL",
+  "developmentStageCode": "NA",
+
   "conditions": ["疾病"],
-  "sponsor": {"name": "申办/发起机构"},
-  "facilities": [{"name": "执行机构", "city": "城市", "country": "国家"}],
+  "sponsor": {"name": "申办/发起机构", "className": "OTHER"},
+  "facilities": [
+    {"name": "执行机构", "city": "城市", "country": "China"}
+  ],
+  "centerScopeCode": "MULTICENTER",
   "sourceRecordUrl": "https://官方记录地址",
   "dates": {"lastUpdatePosted": "2026-08-28"}
 }
 ```
 
-其余字段为可选。前端会自动补齐“未公开”。
+## registrationPathCode
 
-## 推荐接入路径
+- `REGULATORY_DRUG`：药品注册性试验
+- `IIT`：IIT / 研究者发起研究
+- `NON_REG`：其他非注册性临床研究
+- `UNKNOWN`：暂无法判定
 
-- WHO ICTRP：优先使用 WHO 允许的数据下载/SharePoint/正式 Web Service；遵守其使用条款。
-- ChiCTR：优先通过官方授权、公开导出或后续官方 API 接入。
-- 国家医学研究登记备案：优先使用官方公开查询/授权接口或合规数据导出。
-- NMPA：优先使用药物临床试验登记与信息公示平台的官方接口/授权数据导出。
+### 默认规则
 
-任何新接入都应保留 `sourceRecordUrl`、来源处理时间和原始注册编号，用于证据追溯。
+- NMPA：若无显式字段，默认 `REGULATORY_DRUG`
+- 国家医学研究登记备案：若无显式 IIT 字段，默认 `NON_REG`
+- ChiCTR：不自动等同 IIT，默认 `UNKNOWN`
+- WHO ICTRP：默认 `UNKNOWN`
+
+## researchTypeCode
+
+可用值：
+
+`INTERVENTIONAL`、`OBSERVATIONAL`、`DIAGNOSTIC`、`PROGNOSTIC`、`ETIOLOGIC`、`EPIDEMIOLOGIC`、`PREVENTION`、`SCREENING`、`HEALTH_SERVICES`、`EXPANDED_ACCESS`、`OTHER`、`UNKNOWN`。
+
+## developmentStageCode
+
+可用值：
+
+`EARLY_PHASE1`、`PHASE1`、`PHASE1_PHASE2`、`PHASE2`、`PHASE2_PHASE3`、`PHASE3`、`PHASE4`、`BE`、`PK`、`NA`、`UNKNOWN`。
+
+该字段仅描述药物开发/试验阶段，不用于表达 IIT。
+
+## centerScopeCode
+
+- `SINGLE_CENTER`
+- `MULTICENTER`
+- `UNKNOWN`
+
+前端在未提供显式值时，会根据公开执行中心数量进行保守推断。

@@ -1,55 +1,77 @@
-# 统一字段模型与来源映射
+# v2.1 统一字段映射
 
-## Canonical Study Model
+## 核心研究字段
 
-所有来源先转换为统一结构：
+| 统一字段 | ClinicalTrials.gov | 多源快照 |
+|---|---|---|
+| `canonicalId` | NCT ID | 来源主编号/交叉编号合并后主实体ID |
+| `identifiers` | NCT ID | ChiCTR / NCT / CTR / 备案编号等 |
+| `statusCode` | `statusModule.overallStatus` | `statusCode` |
+| `conditions` | `conditionsModule.conditions` | `conditions[]` |
+| `sponsor` | `sponsorCollaboratorsModule.leadSponsor` | `sponsor` |
+| `facilities` | `contactsLocationsModule.locations` | `facilities[]` |
+| `enrollment` | `designModule.enrollmentInfo` | `enrollment` |
+| `sourceRecordUrl` | ClinicalTrials.gov 原始页 | 各来源官方原始页 |
 
-| 统一字段 | 含义 |
+## v2.1 四维分类
+
+### 1. 数据来源 `sourceRecords[]`
+
+由各适配器写入，合并后可同时存在多个来源。
+
+### 2. 研究发起 / 注册路径 `registrationPathCode`
+
+| 值 | 含义 |
 |---|---|
-| `nctId` / `canonicalId` | 当前主显示编号；兼容旧 UI 字段名 |
-| `identifiers` | 各来源注册编号映射 |
-| `briefTitle` / `officialTitle` | 标题 |
-| `statusCode` / `statusLabel` | 研究状态 |
-| `conditions` | 疾病/研究条件 |
-| `interventions` | 干预措施 |
-| `sponsor` | 主要申办/发起机构 |
-| `collaborators` | 合作方 |
-| `facilities` | 执行中心 |
-| `enrollment` | 计划或实际人数 |
-| `dates` | 研究时间节点 |
-| `eligibility` | 入排标准 |
-| `primaryOutcomes` / `secondaryOutcomes` | 结局指标 |
-| `sourceRecords` | 来源证据链 |
-| `sourceKey` / `sourceName` | 当前主来源 |
+| `REGULATORY_DRUG` | 药品注册性试验 |
+| `IIT` | IIT / 研究者发起研究 |
+| `NON_REG` | 其他非注册性临床研究 |
+| `UNKNOWN` | 暂无法判定 |
 
-## ClinicalTrials.gov V2
+ClinicalTrials.gov 不提供足够证据时保持 `UNKNOWN`。
 
-| 统一字段 | ClinicalTrials.gov API V2 |
-|---|---|
-| NCT ID | `protocolSection.identificationModule.nctId` |
-| 标题 | `identificationModule.briefTitle / officialTitle` |
-| 状态 | `statusModule.overallStatus` |
-| 疾病 | `conditionsModule.conditions` |
-| 分期/类型/人数 | `designModule` |
-| 申办/合作 | `sponsorCollaboratorsModule` |
-| 干预/分组 | `armsInterventionsModule` |
-| 联系人与执行中心 | `contactsLocationsModule` |
-| 入排标准 | `eligibilityModule` |
-| 结局指标 | `outcomesModule` |
+NMPA 快照在无显式值时默认 `REGULATORY_DRUG`。
 
-## WHO ICTRP / ChiCTR / NMRR / NMPA
+### 3. 研究类型 `researchTypeCode`
 
-v2.0 使用 `data/*.json` 统一导入接口。各来源的 ETL 应至少保留：
+ClinicalTrials.gov：
 
-- 来源主编号；
-- 交叉注册编号（如有）；
-- 原始页面 URL；
-- 来源处理时间；
-- 标题；
-- 状态；
-- 疾病；
-- 申办/发起机构；
-- 执行机构；
-- 最近更新时间。
+- `INTERVENTIONAL`
+- `OBSERVATIONAL`
+- `EXPANDED_ACCESS`
 
-完整 schema 示例见 `data/README.md`。
+国内快照还可使用：
+
+- `DIAGNOSTIC`
+- `PROGNOSTIC`
+- `ETIOLOGIC`
+- `EPIDEMIOLOGIC`
+- `PREVENTION`
+- `SCREENING`
+- `HEALTH_SERVICES`
+- `OTHER`
+
+### 4. 药物开发 / 试验阶段 `developmentStageCode`
+
+ClinicalTrials.gov `designModule.phases` 标准化为：
+
+- `EARLY_PHASE1`
+- `PHASE1`
+- `PHASE1_PHASE2`
+- `PHASE2`
+- `PHASE2_PHASE3`
+- `PHASE3`
+- `PHASE4`
+- `NA`
+- `UNKNOWN`
+
+NMPA 等来源还可显式提供：
+
+- `BE`
+- `PK`
+
+## 执行中心范围
+
+`centerScopeCode`：`SINGLE_CENTER` / `MULTICENTER` / `UNKNOWN`。
+
+若来源未显式提供，前端适配器根据公开执行中心数量做保守推断。

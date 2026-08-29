@@ -47,3 +47,14 @@ test('filters and sorts normalized records safely', () => {
   const sorted = sortStudies(studies, 'enrollment-desc')
   assert.equal(sorted[0].nctId, 'NCT07654321')
 })
+
+test('keeps source, registration path, research type and drug stage as separate dimensions', () => {
+  const study = normalizeStudyList(fixture).studies[0]
+  assert.equal(study.registrationPathCode, 'UNKNOWN')
+  assert.equal(study.researchTypeCode, 'INTERVENTIONAL')
+  assert.equal(study.developmentStageCode, 'PHASE3')
+  assert.equal(study.centerScopeCode, 'SINGLE_CENTER')
+
+  assert.equal(matchesClientFilters(study, { researchType: 'INTERVENTIONAL', developmentStage: 'PHASE3' }), true)
+  assert.equal(matchesClientFilters(study, { registrationPath: 'IIT' }), false)
+})

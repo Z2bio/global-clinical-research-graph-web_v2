@@ -42,7 +42,11 @@ const checks = [
   ['medical research filing source', /医学研究登记备案/i],
   ['module entry', /type="module" src="\.\/assets\/js\/app\.js"/],
   ['main landmark', /<main id="main-content">/],
-  ['search label', /role="search"/]
+  ['search label', /role="search"/],
+  ['source filter', /id="source-filter-options"/],
+  ['registration path filter', /id="registration-path-filter"/],
+  ['research type filter', /id="research-type-filter"/],
+  ['development stage filter', /id="phase-filter"/]
 ]
 for (const [name, pattern] of checks) {
   if (!pattern.test(html)) errors.push(`HTML audit failed: ${name}`)
@@ -51,7 +55,7 @@ for (const [name, pattern] of checks) {
 
 const htmlIds = new Set([...html.matchAll(/id="([^"]+)"/g)].map((match) => match[1]))
 const appSource = fs.readFileSync(path.join(root, 'assets/js/app.js'), 'utf8')
-const idSelectors = [...appSource.matchAll(/\$\('#([^']+)'/g)].map((match) => match[1])
+const idSelectors = [...appSource.matchAll(/(?<!\$)\$\('#([^']+)'\)/g)].map((match) => match[1])
 for (const selector of idSelectors) {
   if (!htmlIds.has(selector) && !selector.startsWith('m-')) errors.push(`JavaScript references missing HTML id: ${selector}`)
 }

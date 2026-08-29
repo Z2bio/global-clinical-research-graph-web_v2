@@ -1,7 +1,11 @@
 import {
   ENROLLMENT_TYPE_LABELS,
   INTERVENTION_TYPE_LABELS,
+  CENTER_SCOPE_LABELS,
+  DEVELOPMENT_STAGE_LABELS,
   PHASE_LABELS,
+  REGISTRATION_PATH_LABELS,
+  RESEARCH_TYPE_LABELS,
   SEX_LABELS,
   SPONSOR_CLASS_LABELS,
   STUDY_TYPE_LABELS,
@@ -36,6 +40,34 @@ export function formatDate(value) {
   if (!raw) return UNKNOWN
   const iso = raw.match(/^\d{4}-\d{2}-\d{2}/)?.[0]
   return iso || raw
+}
+
+
+export function deriveDevelopmentStage(phases = [], studyType = '') {
+  const values = asArray(phases).map((item) => cleanText(item)).filter(Boolean)
+  if (values.includes('PHASE1') && values.includes('PHASE2')) return 'PHASE1_PHASE2'
+  if (values.includes('PHASE2') && values.includes('PHASE3')) return 'PHASE2_PHASE3'
+  if (values.length === 1 && DEVELOPMENT_STAGE_LABELS[values[0]]) return values[0]
+  if (!values.length && studyType === 'OBSERVATIONAL') return 'NA'
+  if (values.includes('NA')) return 'NA'
+  return values[0] && DEVELOPMENT_STAGE_LABELS[values[0]] ? values[0] : 'UNKNOWN'
+}
+
+export function deriveCenterScope(facilities = []) {
+  const count = asArray(facilities).filter((item) => item && item.name && item.name !== UNKNOWN).length
+  if (count > 1) return 'MULTICENTER'
+  if (count === 1) return 'SINGLE_CENTER'
+  return 'UNKNOWN'
+}
+
+export function registrationPathMeta(code = 'UNKNOWN') {
+  const key = REGISTRATION_PATH_LABELS[code] ? code : 'UNKNOWN'
+  return { code: key, label: REGISTRATION_PATH_LABELS[key] }
+}
+
+export function researchTypeMeta(code = 'UNKNOWN', fallbackLabel = '') {
+  const key = RESEARCH_TYPE_LABELS[code] ? code : 'UNKNOWN'
+  return { code: key, label: fallbackLabel || RESEARCH_TYPE_LABELS[key] }
 }
 
 export function formatNumber(value) {
@@ -211,6 +243,12 @@ export function normalizeStudy(study = {}) {
   const criteria = extractCriteria(eligibilityModule.eligibilityCriteria)
   const studyType = cleanText(designModule.studyType, UNKNOWN)
   const studyTypeLabel = STUDY_TYPE_LABELS[studyType] || studyType
+  const researchType = researchTypeMeta(studyType, studyTypeLabel)
+  const developmentStageCode = deriveDevelopmentStage(phases, studyType)
+  const developmentStageLabel = DEVELOPMENT_STAGE_LABELS[developmentStageCode] || phaseText
+  const registrationPath = registrationPathMeta('UNKNOWN')
+  const centerScopeCode = deriveCenterScope(facilities)
+  const centerScopeLabel = CENTER_SCOPE_LABELS[centerScopeCode]
   const officialTitle = cleanText(identification.officialTitle, identification.briefTitle || UNKNOWN)
   const briefTitle = cleanText(identification.briefTitle, officialTitle)
   const registeredSummary = cleanText(descriptionModule.briefSummary)
@@ -229,9 +267,18 @@ export function normalizeStudy(study = {}) {
     statusVerifiedDate: formatDate(statusModule.statusVerifiedDate),
     whyStopped: cleanText(statusModule.whyStopped),
     phases,
-    phaseLabel: phaseText,
+    phaseLabel: developmentStageLabel,
+    developmentStageCode,
+    developmentStageLabel,
+    registrationPathCode: registrationPath.code,
+    registrationPathLabel: registrationPath.label,
+    registrationPathNote: 'ClinicalTrials.gov 本身不能直接判定研究属于药品注册性试验或 IIT；如无其他监管/备案来源交叉证据，平台保持“暂无法判定”。',
     studyType,
     studyTypeLabel,
+    researchTypeCode: researchType.code,
+    researchTypeLabel: researchType.label,
+    centerScopeCode,
+    centerScopeLabel,
     conditions,
     mainCondition: conditions[0] || UNKNOWN,
     keywords: asArray(conditionsModule.keywords).map((item) => cleanText(item)).filter(Boolean),
@@ -315,9 +362,20 @@ export function isUpdatedWithinDays(dateValue, days = 30, now = new Date()) {
 }
 
 export function matchesClientFilters(study, filters = {}) {
+  if (Array.isArray(filters.sourceKeys) && filters.sourceKeys.length) {
+    const presentSources = new Set((study.sourceRecords || []).map((item) => item.sourceKey).filter(Boolean))
+    if (!filters.sourceKeys.some((key) => presentSources.has(key) || study.sourceKey === key)) return false
+  }
+  if (filters.registrationPath && study.registrationPathCode !== filters.registrationPath) return false
+  if (filters.researchType && study.researchTypeCode !== filters.researchType) return false
+  if (filters.developmentStage && study.developmentStageCode !== filters.developmentStage) return false
   if (filters.phase && !study.phases.includes(filters.phase)) return false
   if (filters.country && !study.countries.includes(filters.country)) return false
   if (filters.sponsorClass && study.sponsor.className !== filters.sponsorClass) return false
+  if (filters.centerScope && study.centerScopeCode !== filters.centerScope) return false
+  if (filters.results === 'HAS_RESULTS' && !study.hasResults) return false
+  if (filters.results === 'NO_RESULTS' && study.hasResults) return false
+  if (Number(filters.updatedWithinDays) > 0 && !isUpdatedWithinDays(study.dates?.lastUpdatePosted, Number(filters.updatedWithinDays))) return false
   return true
 }
 

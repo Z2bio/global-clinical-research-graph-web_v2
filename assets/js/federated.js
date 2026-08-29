@@ -1,5 +1,18 @@
-import { getStatusMeta } from './dictionary.js'
-import { cleanText, formatDate } from './normalizer.js'
+import {
+  CENTER_SCOPE_LABELS,
+  DEVELOPMENT_STAGE_LABELS,
+  REGISTRATION_PATH_LABELS,
+  RESEARCH_TYPE_LABELS,
+  getStatusMeta
+} from './dictionary.js'
+import {
+  cleanText,
+  deriveCenterScope,
+  deriveDevelopmentStage,
+  formatDate,
+  registrationPathMeta,
+  researchTypeMeta
+} from './normalizer.js'
 
 export const SOURCE_DEFINITIONS = Object.freeze({
   clinicaltrials: {
@@ -109,6 +122,26 @@ function sourceIdMap(record = {}, sourceKey) {
   return Object.fromEntries(Object.entries(identifiers).filter(([, value]) => cleanText(value)).map(([key, value]) => [key, cleanText(value)]))
 }
 
+function inferSnapshotRegistrationPath(record = {}, sourceKey) {
+  const explicit = cleanText(record.registrationPathCode || record.registrationPath)
+  if (REGISTRATION_PATH_LABELS[explicit]) {
+    return { ...registrationPathMeta(explicit), note: cleanText(record.registrationPathNote, '来源快照提供了明确的研究发起/注册路径分类。') }
+  }
+  if (sourceKey === 'nmpa') {
+    return { code: 'REGULATORY_DRUG', label: REGISTRATION_PATH_LABELS.REGULATORY_DRUG, note: '该记录来自 NMPA 药物临床试验登记来源，平台按药品注册性试验路径展示。' }
+  }
+  if (sourceKey === 'nmrr') {
+    return { code: 'NON_REG', label: REGISTRATION_PATH_LABELS.NON_REG, note: '该记录来自国家医学研究登记备案来源；若快照未明确标注 IIT，则不自动等同为 IIT。' }
+  }
+  return { code: 'UNKNOWN', label: REGISTRATION_PATH_LABELS.UNKNOWN, note: '公开登记来源不足以可靠判断该研究属于注册性试验还是 IIT，平台暂不自动推断。' }
+}
+
+function inferSnapshotResearchType(record = {}) {
+  const code = cleanText(record.researchTypeCode || record.studyType, 'UNKNOWN')
+  const explicitLabel = cleanText(record.researchTypeLabel || record.studyTypeLabel)
+  return researchTypeMeta(code, explicitLabel || RESEARCH_TYPE_LABELS[code] || '')
+}
+
 export function normalizeSnapshotRecord(record = {}, sourceKey) {
   const source = SOURCE_DEFINITIONS[sourceKey]
   const identifiers = sourceIdMap(record, sourceKey)
@@ -119,7 +152,11 @@ export function normalizeSnapshotRecord(record = {}, sourceKey) {
   const conditions = arr(record.conditions).map((x) => cleanText(x)).filter(Boolean)
   const enrollmentCount = Number(record.enrollment?.count)
   const phases = arr(record.phases).map((x) => cleanText(x)).filter(Boolean)
-  const phaseLabel = cleanText(record.phaseLabel || phases.join('/'), '分期未公开')
+  const studyType = cleanText(record.studyType, 'UNKNOWN')
+  const developmentStageCode = cleanText(record.developmentStageCode || record.stageCode) || deriveDevelopmentStage(phases, studyType)
+  const developmentStageLabel = cleanText(record.developmentStageLabel || record.stageLabel, DEVELOPMENT_STAGE_LABELS[developmentStageCode] || '阶段未公开')
+  const registrationPath = inferSnapshotRegistrationPath(record, sourceKey)
+  const researchType = inferSnapshotResearchType(record)
   const sponsorName = cleanText(record.sponsor?.name || record.sponsor, UNKNOWN)
   const sourceUrl = cleanText(record.sourceRecordUrl || record.url, source.home)
   const lastUpdate = formatDate(record.dates?.lastUpdatePosted || record.lastUpdate || record.updatedAt)
@@ -134,6 +171,9 @@ export function normalizeSnapshotRecord(record = {}, sourceKey) {
         armGroupLabels: arr(item.armGroupLabels),
         otherNames: arr(item.otherNames)
       })
+
+  const centerScopeCode = cleanText(record.centerScopeCode) || deriveCenterScope(facilities)
+  const centerScopeLabel = cleanText(record.centerScopeLabel, CENTER_SCOPE_LABELS[centerScopeCode] || CENTER_SCOPE_LABELS.UNKNOWN)
 
   return {
     nctId: primaryId,
@@ -150,9 +190,18 @@ export function normalizeSnapshotRecord(record = {}, sourceKey) {
     statusVerifiedDate: formatDate(record.statusVerifiedDate || lastUpdate),
     whyStopped: cleanText(record.whyStopped),
     phases,
-    phaseLabel,
-    studyType: cleanText(record.studyType, UNKNOWN),
-    studyTypeLabel: cleanText(record.studyTypeLabel || record.studyType, '研究类型未公开'),
+    phaseLabel: developmentStageLabel,
+    developmentStageCode,
+    developmentStageLabel,
+    registrationPathCode: registrationPath.code,
+    registrationPathLabel: registrationPath.label,
+    registrationPathNote: registrationPath.note,
+    studyType,
+    studyTypeLabel: researchType.label,
+    researchTypeCode: researchType.code,
+    researchTypeLabel: researchType.label,
+    centerScopeCode,
+    centerScopeLabel,
     conditions,
     mainCondition: conditions[0] || UNKNOWN,
     keywords: arr(record.keywords).map((x) => cleanText(x)).filter(Boolean),

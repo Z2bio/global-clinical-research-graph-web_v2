@@ -19,6 +19,38 @@ function mergeUniqueObjects(items, keyFn) {
   })
 }
 
+
+function mergeClassification(base, incoming) {
+  const warnings = [...(base.classificationWarnings || []), ...(incoming.classificationWarnings || [])]
+  const result = {}
+  const dimensions = [
+    ['registrationPathCode', 'registrationPathLabel', 'registrationPathNote'],
+    ['researchTypeCode', 'researchTypeLabel'],
+    ['developmentStageCode', 'developmentStageLabel'],
+    ['centerScopeCode', 'centerScopeLabel']
+  ]
+  for (const [codeField, labelField, noteField] of dimensions) {
+    const baseCode = base[codeField] || 'UNKNOWN'
+    const incomingCode = incoming[codeField] || 'UNKNOWN'
+    const baseKnown = !['UNKNOWN', ''].includes(baseCode)
+    const incomingKnown = !['UNKNOWN', ''].includes(incomingCode)
+    if (!baseKnown && incomingKnown) {
+      result[codeField] = incomingCode
+      result[labelField] = incoming[labelField]
+      if (noteField) result[noteField] = incoming[noteField]
+    } else {
+      result[codeField] = base[codeField]
+      result[labelField] = base[labelField]
+      if (noteField) result[noteField] = base[noteField]
+      if (baseKnown && incomingKnown && baseCode !== incomingCode) {
+        warnings.push(`${codeField}: ${baseCode} vs ${incomingCode}`)
+      }
+    }
+  }
+  result.classificationWarnings = [...new Set(warnings)]
+  return result
+}
+
 export function mergeExactCrossRegistrations(studies = []) {
   const merged = []
   for (const incoming of studies) {
@@ -34,6 +66,7 @@ export function mergeExactCrossRegistrations(studies = []) {
     )
     merged[index] = {
       ...base,
+      ...mergeClassification(base, incoming),
       identifiers: { ...(base.identifiers || {}), ...(incoming.identifiers || {}) },
       sourceRecords,
       sourceCount: sourceRecords.length,

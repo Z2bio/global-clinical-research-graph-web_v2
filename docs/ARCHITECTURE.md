@@ -1,21 +1,18 @@
-# v2.0 架构：Global + China Clinical Research Graph
+# v2.1 架构：Global + China Clinical Research Graph
 
-## 目标
+## 核心实体
 
-从“Drug Trial Database”升级为“Clinical Research Graph”。
-
-核心实体不是药物，而是 **Study（研究）**。
-
-## 核心数据对象
+系统核心仍然是 `Study`，而不是 Drug。
 
 ```text
-Study
-├── identifiers
-│   ├── NCT
-│   ├── ChiCTR
-│   ├── WHO/UTN/Primary Registry ID
-│   ├── NMPA CTR
-│   └── 国家医学研究备案编号
+Canonical Study
+├── identifiers[]
+├── sourceRecords[]
+├── classification
+│   ├── source
+│   ├── registrationPath
+│   ├── researchType
+│   └── developmentStage
 ├── conditions
 ├── interventions
 ├── sponsor / initiator
@@ -26,52 +23,57 @@ Study
 ├── status
 ├── dates
 ├── outcomes
-├── eligibility
-└── sourceRecords[]
+└── eligibility
 ```
 
-## 前端数据流
+## 四个不可混淆的分类维度
+
+1. **Source**：这条证据来自哪里。
+2. **Registration Path**：注册性药物试验、IIT、其他非注册研究或未知。
+3. **Research Type**：干预、观察、诊断、预后等。
+4. **Development Stage**：I/II/III/IV、BE、PK、N/A等。
+
+## 多源数据流
 
 ```text
 ClinicalTrials.gov API ─────┐
-WHO ICTRP JSON snapshot ────┤
-ChiCTR JSON snapshot ───────┤
-NMRR JSON snapshot ─────────┼─→ normalize → exact-ID merge → cards/detail/source chain
-NMPA JSON snapshot ─────────┘
+WHO ICTRP snapshot ─────────┤
+ChiCTR snapshot ────────────┤
+NMRR snapshot ──────────────┼─→ normalize
+NMPA snapshot ──────────────┘
+                               ↓
+                       exact-ID merge
+                               ↓
+                  classification evidence merge
+                               ↓
+                       cards / detail / filters
 ```
 
-## 真实性优先
+## 交叉来源分类升级
 
-多源系统最危险的问题不是“数据少”，而是：
+例如：
 
-1. 把不同研究错误合并；
-2. 把旧数据显示成实时数据；
-3. 把网页抓取结果伪装成官方 API；
-4. 丢失来源，导致无法核验。
+```text
+NCT00000001
+ClinicalTrials.gov → registrationPath = UNKNOWN
 
-因此 v2.0 采用：
+CTR20260001
+NMPA → registrationPath = REGULATORY_DRUG
+secondary ID = NCT00000001
+```
 
-- 明确显示来源；
-- 显示来源原始链接；
-- 显示更新时间；
-- 仅用精确交叉编号自动去重；
-- 对没有接入的数据源明确显示“当前快照为空”。
+精确 ID 合并后，Canonical Study 可使用 NMPA 的明确来源证据，把注册路径升级为：
 
-## 后续 v2.1 推荐
+```text
+REGULATORY_DRUG
+```
 
-新增后端：
+但不会仅凭“企业申办 + III期”自动推断。
 
-- Cloudflare Workers / Pages Functions；或
-- Vercel Functions；或
-- 自有 FastAPI / Node 服务。
+## 冲突处理
 
-后端负责：
+若两个已明确来源对同一维度给出互相冲突的非 UNKNOWN 分类：
 
-- WHO 下载/授权接口同步；
-- ChiCTR 合规同步；
-- 国家医学研究登记备案合规同步；
-- NMPA 合规同步；
-- 定时 ETL；
-- 历史版本；
-- 跨源 ID 映射；
-- Graph 数据库存储。
+- 不静默覆盖；
+- 保留 `classificationWarnings`；
+- 后续可在后台审核模块中人工处理。

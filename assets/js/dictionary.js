@@ -1,28 +1,68 @@
 export const STATUS_META = Object.freeze({
-  RECRUITING: { label: '招募中', className: 'status-recruiting', plain: '登记显示试验正在招募，但具体中心是否仍开放需向研究机构核实。' },
-  NOT_YET_RECRUITING: { label: '尚未招募', className: 'status-pending', plain: '试验已经登记，但公开状态显示尚未开始招募。' },
-  ENROLLING_BY_INVITATION: { label: '仅受邀招募', className: 'status-pending', plain: '试验只通过研究团队邀请特定人群参加。' },
+  RECRUITING: { label: '招募中', className: 'status-recruiting', plain: '登记显示研究正在招募，但具体中心是否仍开放需向研究机构核实。' },
+  NOT_YET_RECRUITING: { label: '尚未招募', className: 'status-pending', plain: '研究已经登记，但公开状态显示尚未开始招募。' },
+  ENROLLING_BY_INVITATION: { label: '仅受邀招募', className: 'status-pending', plain: '研究只通过研究团队邀请特定人群参加。' },
   ACTIVE_NOT_RECRUITING: { label: '进行中，不再招募', className: 'status-active', plain: '研究仍在进行，但登记显示已停止接收新受试者。' },
   SUSPENDED: { label: '暂停', className: 'status-paused', plain: '招募或研究活动暂时停止，未来可能恢复。' },
   COMPLETED: { label: '已完成', className: 'status-completed', plain: '研究活动已经结束，但不代表研究结果已经公开。' },
   TERMINATED: { label: '已终止', className: 'status-stopped', plain: '研究在原计划完成前停止。原因需查看官方登记说明。' },
   WITHDRAWN: { label: '已撤回', className: 'status-stopped', plain: '研究在开始招募前撤回。' },
-  UNKNOWN: { label: '状态未知', className: 'status-unknown', plain: '官方登记未提供可识别的当前状态。' }
+  UNKNOWN: { label: '状态未知', className: 'status-unknown', plain: '公开登记未提供可识别的当前状态。' }
 })
 
 export const PHASE_LABELS = Object.freeze({
   EARLY_PHASE1: '早期Ⅰ期',
   PHASE1: 'Ⅰ期',
+  PHASE1_PHASE2: 'Ⅰ/Ⅱ期',
   PHASE2: 'Ⅱ期',
+  PHASE2_PHASE3: 'Ⅱ/Ⅲ期',
   PHASE3: 'Ⅲ期',
   PHASE4: 'Ⅳ期',
-  NA: '不适用'
+  BE: 'BE 生物等效性试验',
+  PK: 'PK 药代动力学试验',
+  NA: '不适用',
+  UNKNOWN: '阶段未公开'
 })
+
+export const DEVELOPMENT_STAGE_LABELS = PHASE_LABELS
 
 export const STUDY_TYPE_LABELS = Object.freeze({
   INTERVENTIONAL: '干预性研究',
   OBSERVATIONAL: '观察性研究',
   EXPANDED_ACCESS: '扩大使用研究'
+})
+
+export const RESEARCH_TYPE_LABELS = Object.freeze({
+  INTERVENTIONAL: '干预性研究',
+  OBSERVATIONAL: '观察性研究',
+  DIAGNOSTIC: '诊断研究',
+  PROGNOSTIC: '预后研究',
+  ETIOLOGIC: '病因/相关因素研究',
+  EPIDEMIOLOGIC: '流行病学研究',
+  PREVENTION: '预防研究',
+  SCREENING: '筛查研究',
+  HEALTH_SERVICES: '卫生服务研究',
+  EXPANDED_ACCESS: '扩大使用研究',
+  OTHER: '其他研究',
+  UNKNOWN: '研究类型未公开'
+})
+
+export const REGISTRATION_PATH_LABELS = Object.freeze({
+  REGULATORY_DRUG: '药品注册性试验',
+  IIT: 'IIT / 研究者发起研究',
+  NON_REG: '其他非注册性临床研究',
+  UNKNOWN: '注册路径暂无法判定'
+})
+
+export const CENTER_SCOPE_LABELS = Object.freeze({
+  SINGLE_CENTER: '单中心',
+  MULTICENTER: '多中心',
+  UNKNOWN: '中心范围未公开'
+})
+
+export const RESULT_FILTER_LABELS = Object.freeze({
+  HAS_RESULTS: '已有结果登记',
+  NO_RESULTS: '暂未显示结果登记'
 })
 
 export const SPONSOR_CLASS_LABELS = Object.freeze({
@@ -106,6 +146,8 @@ export function getStatusMeta(code) {
 }
 
 export function phaseLabel(phases = []) {
-  if (!Array.isArray(phases) || phases.length === 0) return '分期未公开'
+  if (!Array.isArray(phases) || phases.length === 0) return '阶段未公开'
+  if (phases.includes('PHASE1') && phases.includes('PHASE2')) return PHASE_LABELS.PHASE1_PHASE2
+  if (phases.includes('PHASE2') && phases.includes('PHASE3')) return PHASE_LABELS.PHASE2_PHASE3
   return phases.map((item) => PHASE_LABELS[item] || item).join(' / ')
 }

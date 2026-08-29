@@ -1,95 +1,150 @@
-# Global + China Clinical Research Graph v2.0.0
+# Global + China Clinical Research Graph v2.1.0
 
 面向普通用户、医生、研究者和行业人员的 **全球 + 中国临床研究公开信息图谱**。
 
-本版本从单一 `ClinicalTrials.gov` 查询工具升级为 **四层数据源架构**：
+本版在 v2.0 四层数据源架构上，重点升级了“研究分类体系”和筛选逻辑，避免把 **数据来源、IIT/注册性、研究类型、药物试验阶段** 混成一个维度。
+
+## 四层数据源
 
 1. **Layer 1｜全球主注册层**：ClinicalTrials.gov
 2. **Layer 2｜全球跨注册中心层**：WHO ICTRP
 3. **Layer 3｜中国广义临床研究层**：ChiCTR + 国家医学研究登记备案信息系统
 4. **Layer 4｜中国药物注册监管层**：NMPA 药物临床试验登记与信息公示平台
 
-核心原则不是“把五个网站放在一起”，而是把每项 **研究 Study** 作为核心实体，连接其注册编号、疾病、干预措施、申办/发起机构、执行医院、进度、结果及多个来源记录。
+## v2.1 的四维分类模型
 
-## 当前真正可实时运行的能力
+每条研究记录至少保留以下四个相互独立的维度：
+
+```text
+Source 数据来源
+├── ClinicalTrials.gov
+├── WHO ICTRP
+├── ChiCTR
+├── 国家医学研究登记备案
+└── NMPA
+
+Registration Path 研究发起/注册路径
+├── 药品注册性试验
+├── IIT / 研究者发起研究
+├── 其他非注册性临床研究
+└── 暂无法判定
+
+Research Type 研究类型
+├── 干预性
+├── 观察性
+├── 诊断
+├── 预后
+├── 病因/相关因素
+├── 流行病学
+├── 预防
+├── 筛查
+├── 卫生服务
+└── 其他
+
+Drug Development Stage 药物开发/试验阶段
+├── Early Phase I
+├── I / I-II / II / II-III / III / IV
+├── BE
+├── PK
+├── 不适用
+└── 未公开
+```
+
+**IIT 不是“研究分期”。** 因此 v2.1 不会把 IIT 放进 I/II/III/IV 的下拉框。
+
+## 真实性规则
 
 ### ClinicalTrials.gov
 
-已配置 API V2，GitHub Pages 用户访问时直接查询最新公开数据，同时使用浏览器本地缓存作为故障降级。
+仍通过 API V2 在用户访问时查询，并使用浏览器本地缓存降级。
 
-### WHO ICTRP / ChiCTR / 国家医学研究登记备案 / NMPA
+但 ClinicalTrials.gov 记录本身 **不会被自动判断为“药品注册性试验”或“IIT”**。如果没有 NMPA、ChiCTR、备案等明确交叉证据，统一显示：
 
-已完成：
+> 注册路径暂无法判定
 
-- 数据源分层 UI；
-- 官方入口；
-- 统一字段模型；
-- 来源适配器；
-- JSON 快照加载；
-- 来源证据链；
-- 交叉注册编号模型；
-- 精确去重/合并；
-- 后续 API / 官方导出接入位置。
+### NMPA
 
-默认 `data/*.json` 为空，因此当前不会谎称这些平台已经被实时抓取。
+通过 NMPA 快照适配器进入系统的记录，默认归入：
 
-> GitHub Pages 只有浏览器前端。对于没有公开匿名 API、需要授权、需要下载凭证或不适合浏览器跨域调用的来源，必须通过官方授权接口、官方导出文件或合规后端 ETL 接入。
+> 药品注册性试验
 
-## 为什么这样设计
+并可使用 `developmentStageCode` 标记 `BE`、`PK`、`PHASE1` 等阶段。
 
-错误方案：
+### ChiCTR
 
-```text
-ClinicalTrials.gov = 全球全部临床研究
+ChiCTR 记录 **不会因为来自 ChiCTR 就自动等同为 IIT**。只有导入数据明确提供：
+
+```json
+"registrationPathCode": "IIT"
 ```
 
-更合理的模型：
+才显示为 IIT。
 
-```text
-ClinicalTrials.gov
-        +
-WHO ICTRP / WHO Primary Registries
-        +
-ChiCTR
-        +
-国家医学研究登记备案
-        +
-NMPA 中国药物注册性试验
-        ↓
-Canonical Study Entity
-        ↓
-Global + China Clinical Research Graph
-```
+### 国家医学研究登记备案
 
-## 交叉注册去重原则
+默认归入“其他非注册性临床研究”；只有导入数据明确标记 IIT 时才进一步归入 IIT。
 
-系统当前只在存在 **完全一致的交叉注册编号** 时自动合并，例如：
+## 新版筛选项
 
-```text
-ClinicalTrials.gov: NCT01234567
-ChiCTR: ChiCTR2600123456
-ChiCTR secondary ID: NCT01234567
-```
+左侧结构化筛选包括：
 
-此时可以判断两条来源记录存在明确交叉关联。
+- 数据来源（多选）
+- 研究发起 / 注册路径
+- 研究类型
+- 公开状态
+- 药物开发 / 试验阶段
+- 执行国家/地区
+- 申办方 / 主办单位类型
+- 最近公开更新时间
+- 更多筛选：单/多中心、是否已有结果登记
+- 当前页排序
 
-系统 **不会仅凭标题、药企或医院相似度强行合并**，避免误把不同研究当作同一个项目。
+## 多源合并
+
+系统只在存在 **完全一致的交叉注册编号** 时自动合并。
+
+当 ClinicalTrials.gov 记录本身“注册路径未知”，但合并到明确的 NMPA 记录时，可以由 NMPA 证据把该 Canonical Study 的注册路径升级为“药品注册性试验”。
+
+如果两个来源对同一分类维度给出冲突值，系统保留冲突标记，不靠标题相似度强制消解。
 
 ## GitHub Pages 部署
 
-本项目无构建依赖，可直接放在仓库根目录。
-
-推荐：
+直接把本目录的全部文件覆盖到原 GitHub 仓库根目录：
 
 ```text
-Settings → Pages → Deploy from a branch
-Branch: main
-Folder: /(root)
+index.html
+404.html
+assets/
+data/
+docs/
+.github/
+.nojekyll
+manifest.webmanifest
+sw.js
+...
 ```
 
-也保留 `.github/workflows/deploy-pages.yml`，如改用 GitHub Actions 亦可。
+然后：
 
-## 本地测试
+```text
+GitHub Desktop
+→ Commit to main
+→ Push origin
+```
+
+如果原仓库 Pages 已配置为：
+
+```text
+Settings → Pages
+Deploy from a branch
+main / (root)
+```
+
+无需重新配置。
+
+> v2.1 已更换 Service Worker 缓存版本。发布后如第一次看到旧页面，强制刷新一次即可让新缓存接管。
+
+## 本地检查
 
 ```bash
 npm test
@@ -97,13 +152,7 @@ npm run audit
 python3 -m http.server 8080
 ```
 
-然后访问：
-
-```text
-http://localhost:8080
-```
-
-## 多源快照目录
+## 多源快照
 
 ```text
 data/
@@ -114,24 +163,15 @@ data/
 └── README.md
 ```
 
-接入新的官方数据时，不需要改 UI，只需要把数据转换为统一 JSON 结构即可。
+当前 WHO ICTRP、ChiCTR、国家医学研究登记备案、NMPA 的 JSON 默认仍为空，不伪装成已实时接通。获得官方授权接口、官方导出或合规 ETL 数据后，按统一结构写入即可。
 
-详见：
-
-- `docs/DATA_SOURCE_MATRIX.md`
-- `docs/ARCHITECTURE.md`
-- `data/README.md`
-
-## 数据与使用边界
+## 使用边界
 
 本项目：
 
-- 仅展示公开研究登记信息；
-- 不收集姓名、电话、病历或基因检测结果；
-- 不进行患者资格判断；
+- 仅整理公开研究登记信息；
+- 不收集姓名、电话、病历或基因检测信息；
+- 不做患者资格判断；
 - 不提供一键报名；
-- 不提供诊疗或用药建议；
-- 不保证公开联系信息持续有效；
-- 所有研究应回链至官方原始记录。
-
-WHO ICTRP 数据另有专门的数据使用条款；若未来将本项目用于商业、营销或推广用途，必须先单独评估 WHO ICTRP 数据的使用许可。
+- 不提供诊断、治疗或用药建议；
+- 所有信息应可回链到官方来源核验。

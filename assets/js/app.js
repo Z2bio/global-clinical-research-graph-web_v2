@@ -1,5 +1,13 @@
 import { CONFIG } from './config.js'
-import { getStatusMeta, PHASE_LABELS, SPONSOR_CLASS_LABELS } from './dictionary.js'
+import {
+  CENTER_SCOPE_LABELS,
+  DEVELOPMENT_STAGE_LABELS,
+  REGISTRATION_PATH_LABELS,
+  RESEARCH_TYPE_LABELS,
+  RESULT_FILTER_LABELS,
+  SPONSOR_CLASS_LABELS,
+  getStatusMeta
+} from './dictionary.js'
 import { getApiVersion, getStudyById, readCachedSearch, searchStudies } from './api.js'
 import { SOURCE_DEFINITIONS, filterSnapshotStudies, loadSnapshots, snapshotStatusMap } from './federated.js'
 import { computeGraphMetrics, mergeExactCrossRegistrations } from './graph.js'
@@ -19,10 +27,16 @@ import {
 
 const state = {
   query: '',
+  sourceKeys: Object.keys(SOURCE_DEFINITIONS),
+  registrationPath: '',
+  researchType: '',
   statusCode: '',
-  phase: '',
+  developmentStage: '',
   country: '',
   sponsorClass: '',
+  updatedWithinDays: '',
+  centerScope: '',
+  results: '',
   sortMode: 'updated-desc',
   studies: [],
   totalCount: 0,
@@ -113,9 +127,15 @@ function searchParams() {
 function filteredStudies() {
   return sortStudies(
     state.studies.filter((study) => matchesClientFilters(study, {
-      phase: state.phase,
+      sourceKeys: state.sourceKeys,
+      registrationPath: state.registrationPath,
+      researchType: state.researchType,
+      developmentStage: state.developmentStage,
       country: state.country,
-      sponsorClass: state.sponsorClass
+      sponsorClass: state.sponsorClass,
+      updatedWithinDays: state.updatedWithinDays,
+      centerScope: state.centerScope,
+      results: state.results
     })),
     state.sortMode
   )
@@ -137,7 +157,7 @@ function renderStats() {
   const visible = filteredStudies()
   const metrics = computeGraphMetrics(visible)
   const recruiting = visible.filter((study) => study.statusCode === 'RECRUITING').length
-  $('#stat-total').textContent = Number.isFinite(state.totalCount) ? formatNumber(state.totalCount) : '—'
+  $('#stat-total').textContent = state.sourceKeys.includes('clinicaltrials') && Number.isFinite(state.totalCount) ? formatNumber(state.totalCount) : '—'
   $('#stat-recruiting').textContent = formatNumber(recruiting)
   $('#stat-countries').textContent = formatNumber(metrics.sourceCount)
   $('#stat-recent').textContent = formatNumber(metrics.crossRegistered)
@@ -149,11 +169,20 @@ function renderStats() {
 
 function activeFilterEntries() {
   const entries = []
+  const allSources = Object.keys(SOURCE_DEFINITIONS)
   if (state.query) entries.push({ key: 'query', label: `关键词：${state.query}` })
+  if (state.sourceKeys.length !== allSources.length) {
+    entries.push({ key: 'sourceKeys', label: `来源：${state.sourceKeys.map((key) => SOURCE_DEFINITIONS[key]?.short || key).join(' + ')}` })
+  }
+  if (state.registrationPath) entries.push({ key: 'registrationPath', label: `路径：${REGISTRATION_PATH_LABELS[state.registrationPath] || state.registrationPath}` })
+  if (state.researchType) entries.push({ key: 'researchType', label: `研究类型：${RESEARCH_TYPE_LABELS[state.researchType] || state.researchType}` })
   if (state.statusCode) entries.push({ key: 'statusCode', label: `状态：${getStatusMeta(state.statusCode).label}` })
-  if (state.phase) entries.push({ key: 'phase', label: `分期：${PHASE_LABELS[state.phase] || state.phase}` })
+  if (state.developmentStage) entries.push({ key: 'developmentStage', label: `阶段：${DEVELOPMENT_STAGE_LABELS[state.developmentStage] || state.developmentStage}` })
   if (state.country) entries.push({ key: 'country', label: `地区：${state.country}` })
-  if (state.sponsorClass) entries.push({ key: 'sponsorClass', label: `申办方：${SPONSOR_CLASS_LABELS[state.sponsorClass] || state.sponsorClass}` })
+  if (state.sponsorClass) entries.push({ key: 'sponsorClass', label: `主办单位：${SPONSOR_CLASS_LABELS[state.sponsorClass] || state.sponsorClass}` })
+  if (state.updatedWithinDays) entries.push({ key: 'updatedWithinDays', label: `更新：近${state.updatedWithinDays}天` })
+  if (state.centerScope) entries.push({ key: 'centerScope', label: `中心：${CENTER_SCOPE_LABELS[state.centerScope] || state.centerScope}` })
+  if (state.results) entries.push({ key: 'results', label: `结果：${RESULT_FILTER_LABELS[state.results] || state.results}` })
   return entries
 }
 
@@ -178,20 +207,23 @@ function renderCard(study, { favoriteContext = false } = {}) {
         <div class="card-topline">
           <div class="card-badges">
             <span class="badge status">${escapeHtml(study.statusLabel)}</span>
-            <span class="badge">${escapeHtml(study.phaseLabel)}</span>
-            <span class="badge">${escapeHtml(study.studyTypeLabel)}</span>
-            <span class="badge source">${escapeHtml(study.sourceShort || '来源')}</span>${(study.sourceRecords?.length || 0) > 1 ? `<span class="badge source">跨 ${study.sourceRecords.length} 个来源</span>` : ''}${study.hasResults ? '<span class="badge source">已有结果登记</span>' : ''}
+            <span class="badge">${escapeHtml(study.developmentStageLabel || study.phaseLabel)}</span>
+            <span class="badge path">${escapeHtml(study.registrationPathLabel || '注册路径暂无法判定')}</span>
+            <span class="badge">${escapeHtml(study.researchTypeLabel || study.studyTypeLabel)}</span>
+            ${(study.sourceRecords || [{ sourceKey: study.sourceKey, sourceName: study.sourceName }]).map((item) => `<span class="badge source">${escapeHtml(SOURCE_DEFINITIONS[item.sourceKey]?.short || item.sourceName || '来源')}</span>`).join('')}
+            ${(study.sourceRecords?.length || 0) > 1 ? `<span class="badge source">跨 ${study.sourceRecords.length} 个来源</span>` : ''}${study.hasResults ? '<span class="badge source">已有结果登记</span>' : ''}
           </div>
           <button class="favorite-button ${isFavorite ? 'active' : ''}" type="button" data-favorite-id="${escapeHtml(study.nctId)}" aria-label="${isFavorite ? '取消关注' : '加入关注'}" title="${isFavorite ? '取消关注' : '加入关注'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
           </button>
         </div>
         <h3 class="trial-title"><button type="button" data-open-detail="${escapeHtml(study.nctId)}">${escapeHtml(study.briefTitle)}</button></h3>
-        <div class="trial-id">${escapeHtml(study.nctId)} · 来源：${escapeHtml(study.sourceName || '公开登记平台')} · 申办/发起方：${escapeHtml(study.sponsor.name)}</div>
+        <div class="trial-id">${escapeHtml(study.nctId)} · 申办/发起方：${escapeHtml(study.sponsor.name)} · ${escapeHtml(study.centerScopeLabel || '中心范围未公开')}</div>
         <p class="plain-summary">${escapeHtml(study.plainSummary)}</p>
         ${favoriteChange ? `<div class="results-alert" style="margin:12px 0 0" role="status">状态变化：${escapeHtml(favoriteChange.from)} → ${escapeHtml(favoriteChange.to)}</div>` : ''}
         <div class="trial-facts">
           <div class="fact"><span class="fact-label">主要疾病</span><span class="fact-value" title="${escapeHtml(study.conditions.join('、'))}">${escapeHtml(study.conditions.slice(0, 3).join('、') || '未公开')}</span></div>
+          <div class="fact"><span class="fact-label">研究发起 / 注册路径</span><span class="fact-value" title="${escapeHtml(study.registrationPathNote || '')}">${escapeHtml(study.registrationPathLabel || '暂无法判定')}</span></div>
           <div class="fact"><span class="fact-label">主要执行单位</span><span class="fact-value" title="${escapeHtml(primaryFacility?.name || '未公开')}">${escapeHtml(primaryFacility?.name || '未公开')}</span></div>
           <div class="fact"><span class="fact-label">干预/疗程公开描述</span><span class="fact-value" title="${escapeHtml(duration)}">${escapeHtml(duration)}</span></div>
           <div class="fact"><span class="fact-label">计划或实际人数</span><span class="fact-value">${study.enrollment.count ? `${escapeHtml(study.enrollment.typeLabel)} ${formatNumber(study.enrollment.count)} 人` : '未公开'}</span></div>
@@ -225,20 +257,20 @@ function renderResults() {
   const visible = filteredStudies()
   const list = $('#trial-list')
   const loadedText = `已加载 ${formatNumber(state.studies.length)} 条，当前筛选显示 ${formatNumber(visible.length)} 条`
-  const totalText = state.totalCount ? `；ClinicalTrials.gov 官方匹配总数 ${formatNumber(state.totalCount)} 条` : ''
+  const totalText = state.sourceKeys.includes('clinicaltrials') && state.totalCount ? `；ClinicalTrials.gov 官方匹配总数 ${formatNumber(state.totalCount)} 条` : ''
   $('#results-summary').textContent = `${loadedText}${totalText}${state.snapshotCount ? `；中国/跨注册快照命中 ${formatNumber(state.snapshotCount)} 条` : ''}`
 
   if (!visible.length) {
     list.innerHTML = emptyState(
       '当前筛选下没有可显示记录',
-      state.studies.length ? '可以重置分期、国家或申办方类型后再查看。' : '请调整检索词，或稍后重新连接官方数据源。',
+      state.studies.length ? '可以重置数据来源、研究路径、研究类型、试验阶段或地区条件后再查看。' : '请调整检索词，或稍后重新连接官方数据源。',
       '<button class="secondary-button" type="button" data-reset-all>重置检索条件</button>'
     )
   } else {
     list.innerHTML = visible.map((study) => renderCard(study)).join('')
   }
 
-  $('#load-more-button').hidden = !state.nextPageToken || state.loadingMore
+  $('#load-more-button').hidden = !state.nextPageToken || state.loadingMore || !state.sourceKeys.includes('clinicaltrials')
   $('#load-more-button').textContent = state.loadingMore ? '正在加载……' : '加载更多公示记录'
   renderFilterChips()
   renderStats()
@@ -445,8 +477,9 @@ function renderDetail(study) {
     <section class="detail-hero ${escapeHtml(study.statusClass)}">
       <div class="detail-badges">
         <span class="badge status">${escapeHtml(study.statusLabel)}</span>
-        <span class="badge">${escapeHtml(study.phaseLabel)}</span>
-        <span class="badge">${escapeHtml(study.studyTypeLabel)}</span>
+        <span class="badge">${escapeHtml(study.developmentStageLabel || study.phaseLabel)}</span>
+        <span class="badge path">${escapeHtml(study.registrationPathLabel || '注册路径暂无法判定')}</span>
+        <span class="badge">${escapeHtml(study.researchTypeLabel || study.studyTypeLabel)}</span>
         <span class="badge">${study.hasResults ? '已有结果登记' : '暂未显示结果登记'}</span>
       </div>
       <h3>${escapeHtml(study.officialTitle)}</h3>
@@ -458,15 +491,18 @@ function renderDetail(study) {
     </section>
 
     <section class="detail-section">
-      <h3><span>01</span>研究疾病与基本概况</h3>
+      <h3><span>01</span>研究定位与基本概况</h3>
       <div class="detail-grid">
         <dl class="detail-item"><dt>研究疾病</dt><dd>${escapeHtml(study.conditions.join('、') || '未公开')}</dd></dl>
         <dl class="detail-item"><dt>官方状态</dt><dd>${escapeHtml(study.statusLabel)}：${escapeHtml(study.statusPlain)}</dd></dl>
-        <dl class="detail-item"><dt>研究分期</dt><dd>${escapeHtml(study.phaseLabel)}</dd></dl>
-        <dl class="detail-item"><dt>研究类型</dt><dd>${escapeHtml(study.studyTypeLabel)}</dd></dl>
+        <dl class="detail-item"><dt>研究发起 / 注册路径</dt><dd>${escapeHtml(study.registrationPathLabel || '暂无法判定')}</dd></dl>
+        <dl class="detail-item"><dt>研究类型</dt><dd>${escapeHtml(study.researchTypeLabel || study.studyTypeLabel)}</dd></dl>
+        <dl class="detail-item"><dt>药物开发 / 试验阶段</dt><dd>${escapeHtml(study.developmentStageLabel || study.phaseLabel)}</dd></dl>
+        <dl class="detail-item"><dt>执行中心范围</dt><dd>${escapeHtml(study.centerScopeLabel || '未公开')}</dd></dl>
         <dl class="detail-item"><dt>计划或实际人数</dt><dd>${study.enrollment.count ? `${escapeHtml(study.enrollment.typeLabel)} ${formatNumber(study.enrollment.count)} 人` : '未公开'}</dd></dl>
         <dl class="detail-item"><dt>公开疗程摘要</dt><dd>${escapeHtml(study.durationSummary)}</dd></dl>
       </div>
+      <p class="classification-note"><strong>分类说明：</strong>${escapeHtml(study.registrationPathNote || '平台仅在来源证据足够时给出注册性/IIT分类；不因来源于 ClinicalTrials.gov 就自动判定。')}</p>
       <details class="disclosure">
         <summary>展开官方简要摘要原文</summary>
         <div class="original-text">${escapeHtml(study.registeredSummary)}</div>
@@ -547,7 +583,7 @@ function renderDetail(study) {
     </section>
 
     <div class="detail-actions">
-      <button class="${isFavorite ? 'secondary-button' : 'primary-button'}" type="button" data-favorite-id="${escapeHtml(study.nctId)}">${isFavorite ? '取消关注' : '关注此试验'}</button>
+      <button class="${isFavorite ? 'secondary-button' : 'primary-button'}" type="button" data-favorite-id="${escapeHtml(study.nctId)}">${isFavorite ? '取消关注' : '关注此研究'}</button>
       <a class="secondary-button" href="${escapeHtml(safeUrl(study.sourceRecordUrl))}" target="_blank" rel="noopener noreferrer">打开 ${escapeHtml(study.sourceName || '来源')} 原始记录</a>
     </div>
   `
@@ -564,7 +600,7 @@ async function openDetail(nctId, { updateHash = true } = {}) {
   if (snapshot) renderDetail(snapshot)
   else {
     $('#detail-nct').textContent = nctId
-    $('#detail-title').textContent = '正在读取临床试验详情'
+    $('#detail-title').textContent = '正在读取临床研究详情'
     $('#detail-content').innerHTML = '<div class="detail-loading">正在读取公开登记详情……</div>'
   }
 
@@ -626,20 +662,38 @@ async function refreshFavorites() {
   showToast(`已实时刷新 ${success}/${liveIds.length} 条 ClinicalTrials.gov 记录；其他来源按快照更新`)
 }
 
+function syncDesktopSourceCheckboxes() {
+  $$('#source-filter-options input[type="checkbox"]').forEach((input) => {
+    input.checked = state.sourceKeys.includes(input.value)
+  })
+}
+
 function resetFilters({ includeQuery = true, rerun = true } = {}) {
   if (includeQuery) {
     state.query = ''
     $('#search-input').value = ''
   }
+  state.sourceKeys = Object.keys(SOURCE_DEFINITIONS)
+  state.registrationPath = ''
+  state.researchType = ''
   state.statusCode = ''
-  state.phase = ''
+  state.developmentStage = ''
   state.country = ''
   state.sponsorClass = ''
+  state.updatedWithinDays = ''
+  state.centerScope = ''
+  state.results = ''
   state.sortMode = 'updated-desc'
+  syncDesktopSourceCheckboxes()
+  $('#registration-path-filter').value = ''
+  $('#research-type-filter').value = ''
   $('#status-filter').value = ''
   $('#phase-filter').value = ''
   $('#country-filter').value = ''
   $('#sponsor-filter').value = ''
+  $('#updated-filter').value = ''
+  $('#center-scope-filter').value = ''
+  $('#results-filter').value = ''
   $('#sort-filter').value = 'updated-desc'
   if (rerun) runSearch({ useCachePreview: true, scroll: true })
 }
@@ -655,33 +709,48 @@ function removeFilter(key) {
     $('#status-filter').value = ''
     return runSearch({ scroll: true })
   }
-  if (key === 'phase') {
-    state.phase = ''
-    $('#phase-filter').value = ''
-  }
-  if (key === 'country') {
-    state.country = ''
-    $('#country-filter').value = ''
-  }
-  if (key === 'sponsorClass') {
-    state.sponsorClass = ''
-    $('#sponsor-filter').value = ''
-  }
+  if (key === 'sourceKeys') { state.sourceKeys = Object.keys(SOURCE_DEFINITIONS); syncDesktopSourceCheckboxes() }
+  if (key === 'registrationPath') { state.registrationPath = ''; $('#registration-path-filter').value = '' }
+  if (key === 'researchType') { state.researchType = ''; $('#research-type-filter').value = '' }
+  if (key === 'developmentStage') { state.developmentStage = ''; $('#phase-filter').value = '' }
+  if (key === 'country') { state.country = ''; $('#country-filter').value = '' }
+  if (key === 'sponsorClass') { state.sponsorClass = ''; $('#sponsor-filter').value = '' }
+  if (key === 'updatedWithinDays') { state.updatedWithinDays = ''; $('#updated-filter').value = '' }
+  if (key === 'centerScope') { state.centerScope = ''; $('#center-scope-filter').value = '' }
+  if (key === 'results') { state.results = ''; $('#results-filter').value = '' }
   renderResults()
+}
+
+function buildSourceCheckboxMarkup(prefix = 'm-') {
+  return Object.values(SOURCE_DEFINITIONS).map((source) => {
+    const checked = state.sourceKeys.includes(source.key) ? 'checked' : ''
+    return `<label><input id="${prefix}source-${escapeHtml(source.key)}" type="checkbox" value="${escapeHtml(source.key)}" ${checked}><span>${escapeHtml(source.short)}</span></label>`
+  }).join('')
 }
 
 function buildMobileFilters() {
   $('#mobile-filter-content').innerHTML = `
+    <fieldset class="filter-group source-filter-group"><legend>数据来源 <span class="filter-inline-hint">可多选</span></legend><div id="m-source-filter-options" class="source-filter-options">${buildSourceCheckboxMarkup()}</div></fieldset>
+    <div class="filter-group"><label for="m-registration-path-filter">研究发起 / 注册路径</label>${$('#registration-path-filter').outerHTML.replace('id="registration-path-filter"', 'id="m-registration-path-filter"')}</div>
+    <div class="filter-group"><label for="m-research-type-filter">研究类型</label>${$('#research-type-filter').outerHTML.replace('id="research-type-filter"', 'id="m-research-type-filter"')}</div>
     <div class="filter-group"><label for="m-status-filter">公开状态</label>${$('#status-filter').outerHTML.replace('id="status-filter"', 'id="m-status-filter"')}</div>
-    <div class="filter-group"><label for="m-phase-filter">研究分期</label>${$('#phase-filter').outerHTML.replace('id="phase-filter"', 'id="m-phase-filter"')}</div>
+    <div class="filter-group"><label for="m-phase-filter">药物开发 / 试验阶段</label>${$('#phase-filter').outerHTML.replace('id="phase-filter"', 'id="m-phase-filter"')}</div>
     <div class="filter-group"><label for="m-country-filter">执行国家/地区</label>${$('#country-filter').outerHTML.replace('id="country-filter"', 'id="m-country-filter"')}</div>
-    <div class="filter-group"><label for="m-sponsor-filter">申办方类型</label>${$('#sponsor-filter').outerHTML.replace('id="sponsor-filter"', 'id="m-sponsor-filter"')}</div>
+    <div class="filter-group"><label for="m-sponsor-filter">申办方 / 主办单位类型</label>${$('#sponsor-filter').outerHTML.replace('id="sponsor-filter"', 'id="m-sponsor-filter"')}</div>
+    <div class="filter-group"><label for="m-updated-filter">最近公开更新时间</label>${$('#updated-filter').outerHTML.replace('id="updated-filter"', 'id="m-updated-filter"')}</div>
+    <div class="filter-group"><label for="m-center-scope-filter">执行中心范围</label>${$('#center-scope-filter').outerHTML.replace('id="center-scope-filter"', 'id="m-center-scope-filter"')}</div>
+    <div class="filter-group"><label for="m-results-filter">结果登记</label>${$('#results-filter').outerHTML.replace('id="results-filter"', 'id="m-results-filter"')}</div>
     <div class="filter-group"><label for="m-sort-filter">当前页排序</label>${$('#sort-filter').outerHTML.replace('id="sort-filter"', 'id="m-sort-filter"')}</div>
   `
+  $('#m-registration-path-filter').value = state.registrationPath
+  $('#m-research-type-filter').value = state.researchType
   $('#m-status-filter').value = state.statusCode
-  $('#m-phase-filter').value = state.phase
+  $('#m-phase-filter').value = state.developmentStage
   $('#m-country-filter').value = state.country
   $('#m-sponsor-filter').value = state.sponsorClass
+  $('#m-updated-filter').value = state.updatedWithinDays
+  $('#m-center-scope-filter').value = state.centerScope
+  $('#m-results-filter').value = state.results
   $('#m-sort-filter').value = state.sortMode
 }
 
@@ -701,16 +770,30 @@ function closeFilterDrawer() {
 }
 
 function applyMobileFilters() {
+  const selectedSources = $$('#m-source-filter-options input[type="checkbox"]:checked').map((input) => input.value)
+  if (!selectedSources.length) { showToast('请至少保留一个数据来源'); return }
   const previousStatus = state.statusCode
+  state.sourceKeys = selectedSources
+  state.registrationPath = $('#m-registration-path-filter').value
+  state.researchType = $('#m-research-type-filter').value
   state.statusCode = $('#m-status-filter').value
-  state.phase = $('#m-phase-filter').value
+  state.developmentStage = $('#m-phase-filter').value
   state.country = $('#m-country-filter').value
   state.sponsorClass = $('#m-sponsor-filter').value
+  state.updatedWithinDays = $('#m-updated-filter').value
+  state.centerScope = $('#m-center-scope-filter').value
+  state.results = $('#m-results-filter').value
   state.sortMode = $('#m-sort-filter').value
+  syncDesktopSourceCheckboxes()
+  $('#registration-path-filter').value = state.registrationPath
+  $('#research-type-filter').value = state.researchType
   $('#status-filter').value = state.statusCode
-  $('#phase-filter').value = state.phase
+  $('#phase-filter').value = state.developmentStage
   $('#country-filter').value = state.country
   $('#sponsor-filter').value = state.sponsorClass
+  $('#updated-filter').value = state.updatedWithinDays
+  $('#center-scope-filter').value = state.centerScope
+  $('#results-filter').value = state.results
   $('#sort-filter').value = state.sortMode
   closeFilterDrawer()
   if (previousStatus !== state.statusCode) runSearch({ scroll: true })
@@ -777,13 +860,25 @@ function bindEvents() {
   $('#refresh-button').addEventListener('click', () => runSearch({ useCachePreview: false }))
   $('#load-more-button').addEventListener('click', loadMore)
   $('#reset-filters').addEventListener('click', () => resetFilters())
+  $('#source-filter-options').addEventListener('change', (event) => {
+    if (!event.target.matches('input[type="checkbox"]')) return
+    const selected = $$('#source-filter-options input[type="checkbox"]:checked').map((input) => input.value)
+    if (!selected.length) { event.target.checked = true; showToast('请至少保留一个数据来源'); return }
+    state.sourceKeys = selected
+    renderResults()
+  })
+  $('#registration-path-filter').addEventListener('change', (event) => { state.registrationPath = event.target.value; renderResults() })
+  $('#research-type-filter').addEventListener('change', (event) => { state.researchType = event.target.value; renderResults() })
   $('#status-filter').addEventListener('change', (event) => {
     state.statusCode = event.target.value
     runSearch({ scroll: true })
   })
-  $('#phase-filter').addEventListener('change', (event) => { state.phase = event.target.value; renderResults() })
+  $('#phase-filter').addEventListener('change', (event) => { state.developmentStage = event.target.value; renderResults() })
   $('#country-filter').addEventListener('change', (event) => { state.country = event.target.value; renderResults() })
   $('#sponsor-filter').addEventListener('change', (event) => { state.sponsorClass = event.target.value; renderResults() })
+  $('#updated-filter').addEventListener('change', (event) => { state.updatedWithinDays = event.target.value; renderResults() })
+  $('#center-scope-filter').addEventListener('change', (event) => { state.centerScope = event.target.value; renderResults() })
+  $('#results-filter').addEventListener('change', (event) => { state.results = event.target.value; renderResults() })
   $('#sort-filter').addEventListener('change', (event) => { state.sortMode = event.target.value; renderResults() })
 
   document.addEventListener('click', (event) => {
@@ -801,12 +896,17 @@ function bindEvents() {
   $$('.drawer-close, .drawer-backdrop').forEach((button) => button.addEventListener('click', closeFilterDrawer))
   $('#mobile-apply-filters').addEventListener('click', applyMobileFilters)
   $('#mobile-reset-filters').addEventListener('click', () => {
-    state.statusCode = ''
-    state.phase = ''
-    state.country = ''
-    state.sponsorClass = ''
-    state.sortMode = 'updated-desc'
-    buildMobileFilters()
+    $$('#m-source-filter-options input[type="checkbox"]').forEach((input) => { input.checked = true })
+    $('#m-registration-path-filter').value = ''
+    $('#m-research-type-filter').value = ''
+    $('#m-status-filter').value = ''
+    $('#m-phase-filter').value = ''
+    $('#m-country-filter').value = ''
+    $('#m-sponsor-filter').value = ''
+    $('#m-updated-filter').value = ''
+    $('#m-center-scope-filter').value = ''
+    $('#m-results-filter').value = ''
+    $('#m-sort-filter').value = 'updated-desc'
   })
   $('#refresh-favorites-button').addEventListener('click', refreshFavorites)
   $('#mobile-menu-button').addEventListener('click', () => {

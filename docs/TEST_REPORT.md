@@ -1,48 +1,23 @@
-# v2.0 测试报告
+# v2.1 测试报告
 
-日期：2026-08-28
+自动化测试覆盖：
 
-## 自动化测试
+1. ClinicalTrials.gov V2 标准化；
+2. 中文常见疾病检索词转换；
+3. 基础筛选与排序；
+4. ChiCTR 快照统一模型；
+5. 精确交叉注册编号合并；
+6. 图谱指标计算；
+7. NMPA 注册性路径默认分类；
+8. ChiCTR 不自动等同 IIT；
+9. 跨来源证据升级注册路径；
+10. Source / Registration Path / Research Type / Development Stage 四维独立；
+11. 合并研究按任一来源证据进行来源筛选；
+12. 本地存储降级。
 
-共 7 项：
+运行：
 
-- ClinicalTrials.gov V2 标准化；
-- 中文疾病查询词转换；
-- 分期/国家/申办方筛选与排序；
-- localStorage 故障降级；
-- ChiCTR 通用快照标准化；
-- 精确交叉注册编号合并；
-- 多源快照检索与图谱指标统计。
-
-结果：**7/7 通过**。
-
-## 静态审计
-
-检查：
-
-- GitHub Pages 必需文件；
-- 5 个数据源文案与入口；
-- DOM ID 与 JS 引用一致性；
-- manifest 相对路径；
-- 8 个 JS 模块安全检查；
-- 无 `eval()`；
-- 医疗免责声明；
-- 多源快照 JSON 存在。
-
-结果：**通过**。
-
-## HTTP 静态文件测试
-
-本地 `python3 -m http.server` 返回：
-
-- `/` → 200
-- `/assets/js/app.js` → 200
-- `/assets/js/federated.js` → 200
-- `/data/who-ictrp.json` → 200
-- `/manifest.webmanifest` → 200
-
-## 浏览器 E2E 限制
-
-当前执行环境的 Chromium 对 `127.0.0.1` 访问被管理员策略阻止（`ERR_BLOCKED_BY_ADMINISTRATOR`），因此无法在本环境完成截图式浏览器 E2E。
-
-正式 GitHub Pages 发布后建议在 Chrome / Safari / 微信内置浏览器各检查一次。
+```bash
+npm test
+npm run audit
+```

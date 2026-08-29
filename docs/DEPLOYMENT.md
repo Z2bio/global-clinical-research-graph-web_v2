@@ -1,47 +1,34 @@
-# GitHub Pages 部署与 v2 升级
+# GitHub Pages 部署 / 替换旧版
 
-## 已有 v1 仓库升级
+## 替换现有仓库
 
-当前若仓库已经发布 v1：
+1. 解压 v2.1.0 ZIP。
+2. GitHub Desktop 选择原仓库。
+3. `Repository → Show in Finder`。
+4. 把 v2.1.0 解压目录**里面的全部文件**复制到该仓库根目录并替换旧文件。
+5. 回 GitHub Desktop，确认出现大量 Changes。
+6. Commit：`Upgrade clinical research graph to v2.1.0`。
+7. `Push origin`。
 
-1. 解压 v2.0 包；
-2. 将 v2.0 包中的所有文件复制到现有 GitHub 本地仓库根目录；
-3. 允许覆盖同名文件；
-4. GitHub Desktop 中检查 Changes；
-5. Summary 建议：`Upgrade to Global + China Clinical Research Graph v2.0.0`；
-6. Commit to main；
-7. Push origin；
-8. 等待 GitHub Pages 自动重新构建。
-
-不需要新建仓库。
-
-## Pages 设置
-
-推荐继续使用：
+如果 Pages 已是：
 
 ```text
 Settings → Pages
-Source: Deploy from a branch
-Branch: main
-Folder: /(root)
+Deploy from a branch
+main / (root)
 ```
 
-或者使用已包含的 `.github/workflows/deploy-pages.yml` 并选择 GitHub Actions。
+无需重新设置。
 
-## 首次发布后的检查
+## 缓存提醒
 
-1. 首页是否出现四层数据源架构；
-2. `数据源覆盖` 页面是否显示 5 个来源卡片；
-3. ClinicalTrials.gov 查询是否正常；
-4. WHO / ChiCTR / NMRR / NMPA 是否明确显示当前快照状态；
-5. 详情页是否出现“来源证据链与交叉注册编号”；
-6. 原始来源链接是否可打开。
+v2.1 把 Service Worker 缓存名升级为 `clinical-research-graph-shell-v2.1.0`。
 
-## 浏览器旧缓存
+发布后如果第一次仍看到旧页面：
 
-v2 service worker 使用新缓存名 `clinical-research-graph-shell-v2.0.0`，正常情况下旧静态缓存会自动失效。
+- 普通刷新一次；
+- 如仍旧，再强制刷新浏览器。
 
-若 GitHub Pages 已更新但浏览器仍显示 v1，可硬刷新一次：
+## 文件位置
 
-- macOS Chrome/Safari：`Command + Shift + R`
-- Windows Chrome/Edge：`Ctrl + Shift + R`
+`index.html` 必须位于仓库根目录，不能额外套一层 v2.1.0 文件夹。

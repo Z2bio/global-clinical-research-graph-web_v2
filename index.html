@@ -20,7 +20,7 @@
 
   <header class="site-header">
     <div class="header-inner container">
-      <a class="brand" href="#/trials" aria-label="返回临床试验公示列表">
+      <a class="brand" href="#/trials" aria-label="返回临床研究公示列表">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 44 44" role="img"><path d="M22 4a18 18 0 1 0 0 36 18 18 0 0 0 0-36Zm0 4c2.5 0 4.9.6 7 1.7-1.7 1.6-4 2.6-7 2.6s-5.3-1-7-2.6A13.9 13.9 0 0 1 22 8Zm-10.1 5.2c2.5 2 5.9 3.1 10.1 3.1s7.6-1.1 10.1-3.1a14 14 0 0 1 3.6 8.8H8.3a14 14 0 0 1 3.6-8.8ZM22 36c-2.5 0-4.9-.6-7-1.7 1.7-1.6 4-2.6 7-2.6s5.3 1 7 2.6A13.9 13.9 0 0 1 22 36Zm10.1-5.2c-2.5-2-5.9-3.1-10.1-3.1s-7.6 1.1-10.1 3.1A14 14 0 0 1 8.3 26h27.4a14 14 0 0 1-3.6 4.8Z"/></svg>
         </span>
@@ -67,7 +67,7 @@
           <form id="search-form" class="search-panel" role="search" autocomplete="off">
             <label class="search-field" for="search-input">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
-              <input id="search-input" name="query" type="search" maxlength="160" placeholder="输入疾病、药企、医院、药物或 NCT / ChiCTR / CTR 等注册编号" aria-describedby="search-help">
+              <input id="search-input" name="query" type="search" maxlength="160" placeholder="输入疾病、药企/发起方、医院、研究名称或 NCT / ChiCTR / CTR 等注册编号" aria-describedby="search-help">
             </label>
             <button class="primary-button search-button" type="submit">查询公示</button>
             <p id="search-help" class="search-help">ClinicalTrials.gov 支持访问时实时查询；其他来源在获得官方授权接口或合规数据快照后自动进入同一检索框架。</p>
@@ -137,6 +137,47 @@
             <button id="reset-filters" class="text-button" type="button">重置</button>
           </div>
 
+          <fieldset class="filter-group source-filter-group" id="source-filter-fieldset">
+            <legend>数据来源 <span class="filter-inline-hint">可多选</span></legend>
+            <div id="source-filter-options" class="source-filter-options">
+              <label><input type="checkbox" value="clinicaltrials" checked><span>ClinicalTrials.gov</span></label>
+              <label><input type="checkbox" value="who" checked><span>WHO ICTRP</span></label>
+              <label><input type="checkbox" value="chictr" checked><span>ChiCTR</span></label>
+              <label><input type="checkbox" value="nmrr" checked><span>国家医学研究备案</span></label>
+              <label><input type="checkbox" value="nmpa" checked><span>NMPA</span></label>
+            </div>
+          </fieldset>
+
+          <div class="filter-group">
+            <label for="registration-path-filter">研究发起 / 注册路径</label>
+            <select id="registration-path-filter">
+              <option value="">全部路径</option>
+              <option value="REGULATORY_DRUG">药品注册性试验</option>
+              <option value="IIT">IIT / 研究者发起研究</option>
+              <option value="NON_REG">其他非注册性临床研究</option>
+              <option value="UNKNOWN">注册路径暂无法判定</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="research-type-filter">研究类型</label>
+            <select id="research-type-filter">
+              <option value="">全部研究类型</option>
+              <option value="INTERVENTIONAL">干预性研究</option>
+              <option value="OBSERVATIONAL">观察性研究</option>
+              <option value="DIAGNOSTIC">诊断研究</option>
+              <option value="PROGNOSTIC">预后研究</option>
+              <option value="ETIOLOGIC">病因/相关因素研究</option>
+              <option value="EPIDEMIOLOGIC">流行病学研究</option>
+              <option value="PREVENTION">预防研究</option>
+              <option value="SCREENING">筛查研究</option>
+              <option value="HEALTH_SERVICES">卫生服务研究</option>
+              <option value="EXPANDED_ACCESS">扩大使用研究</option>
+              <option value="OTHER">其他研究</option>
+              <option value="UNKNOWN">研究类型未公开</option>
+            </select>
+          </div>
+
           <div class="filter-group">
             <label for="status-filter">公开状态</label>
             <select id="status-filter">
@@ -153,15 +194,20 @@
           </div>
 
           <div class="filter-group">
-            <label for="phase-filter">研究分期</label>
+            <label for="phase-filter">药物开发 / 试验阶段</label>
             <select id="phase-filter">
-              <option value="">全部分期</option>
+              <option value="">全部阶段</option>
               <option value="EARLY_PHASE1">早期Ⅰ期</option>
               <option value="PHASE1">Ⅰ期</option>
+              <option value="PHASE1_PHASE2">Ⅰ/Ⅱ期</option>
               <option value="PHASE2">Ⅱ期</option>
+              <option value="PHASE2_PHASE3">Ⅱ/Ⅲ期</option>
               <option value="PHASE3">Ⅲ期</option>
               <option value="PHASE4">Ⅳ期</option>
+              <option value="BE">BE 生物等效性试验</option>
+              <option value="PK">PK 药代动力学试验</option>
               <option value="NA">不适用</option>
+              <option value="UNKNOWN">阶段未公开</option>
             </select>
           </div>
 
@@ -173,15 +219,50 @@
           </div>
 
           <div class="filter-group">
-            <label for="sponsor-filter">申办方类型</label>
+            <label for="sponsor-filter">申办方 / 主办单位类型</label>
             <select id="sponsor-filter">
               <option value="">全部类型</option>
               <option value="INDUSTRY">企业</option>
               <option value="NIH">美国国立卫生研究院</option>
               <option value="FED">政府机构</option>
               <option value="OTHER">医院、高校或其他机构</option>
+              <option value="INDIV">个人研究者</option>
             </select>
           </div>
+
+          <div class="filter-group">
+            <label for="updated-filter">最近公开更新时间</label>
+            <select id="updated-filter">
+              <option value="">不限</option>
+              <option value="7">近7天</option>
+              <option value="30">近30天</option>
+              <option value="90">近90天</option>
+              <option value="365">近1年</option>
+            </select>
+          </div>
+
+          <details class="advanced-filters">
+            <summary>更多筛选</summary>
+            <div class="advanced-filter-body">
+              <div class="filter-group">
+                <label for="center-scope-filter">执行中心范围</label>
+                <select id="center-scope-filter">
+                  <option value="">全部</option>
+                  <option value="SINGLE_CENTER">单中心</option>
+                  <option value="MULTICENTER">多中心</option>
+                  <option value="UNKNOWN">中心范围未公开</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="results-filter">结果登记</label>
+                <select id="results-filter">
+                  <option value="">全部</option>
+                  <option value="HAS_RESULTS">已有结果登记</option>
+                  <option value="NO_RESULTS">暂未显示结果登记</option>
+                </select>
+              </div>
+            </div>
+          </details>
 
           <div class="filter-group">
             <label for="sort-filter">当前页排序</label>
@@ -195,7 +276,7 @@
 
           <div class="filter-note">
             <strong>筛选说明</strong>
-            <p>ClinicalTrials.gov 状态直接参与实时 API 查询；其他已接入来源先进入统一结构，再在浏览器中按分期、国家和机构进一步筛选。</p>
+            <p>来源、研究发起/注册路径、研究类型、药物开发阶段是四个独立维度。ClinicalTrials.gov 不会被平台自动判定为“注册性”或“IIT”；只有来源证据足够时才显示明确分类。</p>
           </div>
         </aside>
 
@@ -203,7 +284,7 @@
           <div class="results-toolbar">
             <div>
               <span class="panel-kicker">公开登记记录</span>
-              <h2 id="results-title">临床试验公示列表</h2>
+              <h2 id="results-title">临床研究公示列表</h2>
               <p id="results-summary">正在准备数据……</p>
             </div>
             <button id="mobile-filter-button" class="secondary-button mobile-filter-button" type="button">筛选</button>
@@ -272,7 +353,7 @@
       <header class="inner-header guide-header">
         <div>
           <p class="eyebrow">阅读与使用边界</p>
-          <h1>如何正确理解临床试验公示信息</h1>
+          <h1>如何正确理解临床研究公示信息</h1>
           <p>本平台帮助整理公开登记字段，但不会判断任何人是否适合参加试验，也不替代医院、研究者或申办方的正式说明。</p>
         </div>
       </header>
@@ -290,7 +371,7 @@
         </article>
         <article class="guide-card">
           <span class="guide-number">03</span>
-          <h2>试验分期不等于疗效等级</h2>
+          <h2>药物试验阶段不等于疗效等级</h2>
           <p>分期主要反映研究所处的开发阶段和研究目的，不能简单解释为药物“更好”或“更差”。</p>
         </article>
         <article class="guide-card">
@@ -366,7 +447,7 @@
       <header class="detail-sheet-header">
         <div>
           <span id="detail-nct" class="detail-nct">NCT</span>
-          <h2 id="detail-title">临床试验详情</h2>
+          <h2 id="detail-title">临床研究详情</h2>
         </div>
         <button class="icon-button modal-close" type="button" aria-label="关闭详情">×</button>
       </header>
