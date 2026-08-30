@@ -1,6 +1,279 @@
 {
-  "generatedAt": null,
-  "sourceProcessedAt": null,
-  "note": "当前未导入本数据源的官方批量数据。网站仍提供官方入口与接入状态，不会把空数据伪装为实时覆盖。",
-  "records": []
+  "generatedAt": "2026-08-29T00:00:00Z",
+  "sourceProcessedAt": "2026-08-29",
+  "sourceName": "ChiCTR",
+  "recordCount": 10,
+  "note": "随 v2.3.0 提供的官方公开页面引导样本；部署后由 GitHub Actions 每日尝试增量刷新。",
+  "records": [
+    {
+      "id": "ChiCTR2600131182",
+      "identifiers": {
+        "chictr": "ChiCTR2600131182"
+      },
+      "briefTitle": "Analysis of the Effectiveness of DAAs Treatment and Its Influencing Factors in Patients with Chronic Hepatitis C",
+      "officialTitle": "Analysis of the Effectiveness of DAAs Treatment and Its Influencing Factors in Patients with Chronic Hepatitis C",
+      "researchTypeCode": "OBSERVATIONAL",
+      "researchTypeLabel": "观察性研究",
+      "studyType": "OBSERVATIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131182",
+      "facilities": [
+        {
+          "name": "Central People’s Hospital of Zhanjiang",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131181",
+      "identifiers": {
+        "chictr": "ChiCTR2600131181"
+      },
+      "briefTitle": "The SYNERTIC strategy combining camrelizumab and apatinib for the treatment of unresectable advanced hepatocellular carcinoma after failure of first-line systemic therapy: A prospective, multicenter, single-arm, open-label, Phase II study",
+      "officialTitle": "The SYNERTIC strategy combining camrelizumab and apatinib for the treatment of unresectable advanced hepatocellular carcinoma after failure of first-line systemic therapy: A prospective, multicenter, single-arm, open-label, Phase II study",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "studyType": "INTERVENTIONAL",
+      "developmentStageCode": "PHASE2",
+      "developmentStageLabel": "Ⅱ期",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131181",
+      "facilities": [
+        {
+          "name": "Mengchao Hepatobilary Hospital of Fujian Medical University",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131180",
+      "identifiers": {
+        "chictr": "ChiCTR2600131180"
+      },
+      "briefTitle": "Safety and efficacy of mecapegfilgrastim plus alltrans retinoic acid and azacitidine for higherrisk myelodysplastic syndromes",
+      "officialTitle": "Safety and efficacy of mecapegfilgrastim plus alltrans retinoic acid and azacitidine for higherrisk myelodysplastic syndromes",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "studyType": "INTERVENTIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131180",
+      "facilities": [
+        {
+          "name": "Jiangsu Province Hospital (The First Affiliated Hospital with Nanjing Medical University)",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131179",
+      "identifiers": {
+        "chictr": "ChiCTR2600131179"
+      },
+      "briefTitle": "Construction and Time-Split Validation of an Early Prediction Model for Severe Organ Dysfunction After Acute Type A Aortic Dissection Surgery Based on a Dynamic Inflammation-Perfusion-Coagulation Recovery Failure Index",
+      "officialTitle": "Construction and Time-Split Validation of an Early Prediction Model for Severe Organ Dysfunction After Acute Type A Aortic Dissection Surgery Based on a Dynamic Inflammation-Perfusion-Coagulation Recovery Failure Index",
+      "researchTypeCode": "OBSERVATIONAL",
+      "researchTypeLabel": "观察性研究",
+      "studyType": "OBSERVATIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131179",
+      "facilities": [
+        {
+          "name": "The University of Hongkong - Shenzhen Hospital",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131178",
+      "identifiers": {
+        "chictr": "ChiCTR2600131178"
+      },
+      "briefTitle": "Association of MIT Typing with Polyvascular Involvement and Prognosis in Ischemic Stroke Patients",
+      "officialTitle": "Association of MIT Typing with Polyvascular Involvement and Prognosis in Ischemic Stroke Patients",
+      "researchTypeCode": "OBSERVATIONAL",
+      "researchTypeLabel": "观察性研究",
+      "studyType": "OBSERVATIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131178",
+      "facilities": [
+        {
+          "name": "The First People’s Hospital of Lianyungang",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131177",
+      "identifiers": {
+        "chictr": "ChiCTR2600131177"
+      },
+      "briefTitle": "Single-arm, single-center, exploratory study of Vibecotamab combined with TAS-102 in the treatment of relapsed/metastatic RAS wild-type colorectal cancer patients who have failed second-line standard therapy",
+      "officialTitle": "Single-arm, single-center, exploratory study of Vibecotamab combined with TAS-102 in the treatment of relapsed/metastatic RAS wild-type colorectal cancer patients who have failed second-line standard therapy",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "studyType": "INTERVENTIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131177",
+      "facilities": [
+        {
+          "name": "Shanghai East Hospital",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131176",
+      "identifiers": {
+        "chictr": "ChiCTR2600131176"
+      },
+      "briefTitle": "Comparison of TACE versus HAIC combined with sintilimab and lenvatinib in patients with intermediate‑advanced hepatocellular carcinoma: a retrospective cohort study",
+      "officialTitle": "Comparison of TACE versus HAIC combined with sintilimab and lenvatinib in patients with intermediate‑advanced hepatocellular carcinoma: a retrospective cohort study",
+      "researchTypeCode": "OBSERVATIONAL",
+      "researchTypeLabel": "观察性研究",
+      "studyType": "OBSERVATIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131176",
+      "facilities": [
+        {
+          "name": "Affiliated Qingyuan Hospital, Guangzhou Medical University (Qingyuan People's Hospital)",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131175",
+      "identifiers": {
+        "chictr": "ChiCTR2600131175"
+      },
+      "briefTitle": "Repair of the ureter using the patient’s own bladder mucosa",
+      "officialTitle": "Repair of the ureter using the patient’s own bladder mucosa",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "studyType": "INTERVENTIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131175",
+      "facilities": [
+        {
+          "name": "Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131174",
+      "identifiers": {
+        "chictr": "ChiCTR2600131174"
+      },
+      "briefTitle": "Effect of Laser Treatment on Snoring and Mild-to-Moderate Sleep Apnea",
+      "officialTitle": "Effect of Laser Treatment on Snoring and Mild-to-Moderate Sleep Apnea",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "studyType": "INTERVENTIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131174",
+      "facilities": [
+        {
+          "name": "The first hospital of Shanxi Medical University",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    },
+    {
+      "id": "ChiCTR2600131173",
+      "identifiers": {
+        "chictr": "ChiCTR2600131173"
+      },
+      "briefTitle": "Clinical observation of DNS combined with GSMT for mild to moderate postpartum stress urinary incontinence",
+      "officialTitle": "Clinical observation of DNS combined with GSMT for mild to moderate postpartum stress urinary incontinence",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "studyType": "INTERVENTIONAL",
+      "developmentStageCode": "UNKNOWN",
+      "developmentStageLabel": "阶段未公开",
+      "registrationPathCode": "UNKNOWN",
+      "registrationPathNote": "ChiCTR 登记本身不能自动等同为 IIT 或药品注册性试验；无明确证据时保持未判定。",
+      "registeredAt": "2026-08-29",
+      "lastUpdate": "2026-08-29",
+      "sourceRecordUrl": "https://www.chictr.org.cn/searchprojEN.html?registrationnumber=ChiCTR2600131173",
+      "facilities": [
+        {
+          "name": "The first affiliated hospital of guangzhou university of Chinese medicine",
+          "country": "China"
+        }
+      ],
+      "countries": [
+        "China"
+      ]
+    }
+  ]
 }

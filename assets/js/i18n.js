@@ -16,6 +16,7 @@ const MESSAGES = {
     chinaFirst: '中国优先', worldView: '全球视图', withCoordinatesOnly: '仅显示可定位记录',
     listMapHint: '点击左侧研究卡片可定位到其执行中心；点击地图中心可查看关联研究。',
     noStudies: '当前没有符合筛选条件的研究。', sourceEvidence: '来源证据', mapMode: '地图模式',
+    viewList: '列表', viewSplit: '列表 + 地图', viewMap: '地图', executionMap: '执行中心地图', worldShort: '全球', inlineMapHint: '点击研究卡片“地图定位”或直接点击医院/中心点。', openFullMap: '打开完整研究图谱 →',
     zh: '中文', en: 'EN'
   },
   'en-US': {
@@ -33,6 +34,7 @@ const MESSAGES = {
     chinaFirst: 'China first', worldView: 'World view', withCoordinatesOnly: 'Located records only',
     listMapHint: 'Select a study card to focus its site; select a site on the map to view linked studies.',
     noStudies: 'No studies match the current filters.', sourceEvidence: 'Source evidence', mapMode: 'Map mode',
+    viewList: 'List', viewSplit: 'List + Map', viewMap: 'Map', executionMap: 'Site map', worldShort: 'World', inlineMapHint: 'Use “Locate on map” or select a hospital/site marker.', openFullMap: 'Open full research map →',
     zh: '中文', en: 'EN'
   }
 }
@@ -57,6 +59,11 @@ const EXACT_EN = new Map([
   ['早期Ⅰ期', 'Early Phase 1'], ['BE 生物等效性试验', 'BE bioequivalence study'], ['PK 药代动力学试验', 'PK pharmacokinetic study'], ['Ⅰ期', 'Phase 1'], ['Ⅰ/Ⅱ期', 'Phase 1/2'], ['Ⅱ期', 'Phase 2'], ['Ⅱ/Ⅲ期', 'Phase 2/3'], ['Ⅲ期', 'Phase 3'], ['Ⅳ期', 'Phase 4'], ['不适用', 'Not applicable'], ['阶段未公开', 'Stage not public'],
   ['企业', 'Industry'], ['政府机构', 'Government'], ['医院、高校或其他机构', 'Hospital, university or other organization'], ['个人研究者', 'Individual investigator'],
   ['主要疾病', 'Condition'], ['当前研究', 'Studies'], ['有坐标研究', 'Studies with coordinates'], ['可定位执行中心', 'Located sites'], ['关联研究', 'Linked studies'], ['地图模式', 'Map mode'], ['主要执行单位', 'Primary site'], ['干预 / 疗程', 'Intervention / regimen'], ['计划或实际人数', 'Planned / actual enrollment'], ['执行国家/地区', 'Countries/regions'], ['最近更新', 'Last update'], ['查看详情', 'View details'],
+  ['列表', 'List'], ['列表 + 地图', 'List + Map'], ['地图', 'Map'], ['执行中心地图', 'Site map'], ['全球', 'World'],
+  ['打开完整研究图谱 →', 'Open full research map →'], ['点击研究卡片“地图定位”或直接点击医院/中心点。', 'Use “Locate on map” or select a hospital/site marker.'],
+  ['地图定位', 'Locate on map'], ['查看结构化详情', 'View structured details'], ['最近公开更新', 'Last public update'],
+  ['实时', 'Live'], ['待授权', 'Authorization required'], ['待数据', 'Feed required'], ['待首轮同步', 'First sync pending'], ['需配置种子', 'Seed configuration required'], ['部分覆盖', 'Partial coverage'], ['同步异常', 'Sync error'], ['降级/旧快照', 'Degraded / cached snapshot'], ['未接入', 'Not connected'],
+  ['Map / 研究分布', 'Map / Research distribution'],
   ['研究定位与基本概况', 'Research classification and overview'], ['执行主体与申办方', 'Sponsor and participating institutions'], ['当前全球进度明细', 'Current study progress'], ['研究协调员联系方式（公开信息）', 'Public study contacts'], ['详细入选与排除标准', 'Detailed eligibility criteria'], ['研究终点', 'Study outcomes'], ['来源证据链与交叉注册编号', 'Source evidence and cross-registration IDs']
 ])
 

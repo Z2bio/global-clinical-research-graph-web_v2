@@ -49,7 +49,8 @@ function chunk(items, size) {
 }
 
 async function convertChinaGpsPoints(AMap, points) {
-  const china = points.filter((point) => isChinaCountry(point.country))
+  const preconverted = points.filter((point) => isChinaCountry(point.country) && String(point.coordinateSystem || '').toLowerCase() === 'gcj02').map((point) => ({ ...point, mapLnglat: point.lnglat, coordinateConverted: true }))
+  const china = points.filter((point) => isChinaCountry(point.country) && String(point.coordinateSystem || '').toLowerCase() !== 'gcj02')
   const others = points.filter((point) => !isChinaCountry(point.country)).map((point) => ({ ...point, mapLnglat: point.lnglat }))
   if (!china.length || typeof AMap.convertFrom !== 'function') {
     return points.map((point) => ({ ...point, mapLnglat: point.lnglat }))
@@ -72,7 +73,63 @@ async function convertChinaGpsPoints(AMap, points) {
       })
     })
   }
-  return [...converted, ...others]
+  return [...converted, ...preconverted, ...others]
+}
+
+
+function geocodeCacheKey(facility = {}) {
+  return `crg-geocode-v1:${[facility.name, facility.city, facility.state, facility.country].filter(Boolean).join('|').toLowerCase()}`
+}
+
+function readGeocodeCache(facility) {
+  try {
+    const raw = localStorage.getItem(geocodeCacheKey(facility))
+    if (!raw) return null
+    const value = JSON.parse(raw)
+    return Array.isArray(value) && value.length === 2 && value.every(Number.isFinite) ? value : null
+  } catch { return null }
+}
+
+function writeGeocodeCache(facility, lnglat) {
+  try { localStorage.setItem(geocodeCacheKey(facility), JSON.stringify(lnglat)) } catch {}
+}
+
+export async function geocodeMissingChinaFacilities(studies = [], { limit = CONFIG.map.geocodeBatchLimit || 60 } = {}) {
+  if (!CONFIG.map.geocodeMissingChinaFacilities || !CONFIG.map.amapKey?.trim()) return studies
+  let AMap
+  try { AMap = await loadAmap() } catch { return studies }
+  if (!AMap?.Geocoder) return studies
+  const geocoder = new AMap.Geocoder({ city: '全国', batch: false })
+  let remaining = Math.max(0, Number(limit) || 0)
+  const cloned = studies.map((study) => ({ ...study, facilities: (study.facilities || []).map((facility) => ({ ...facility })) }))
+  for (const study of cloned) {
+    for (const facility of study.facilities || []) {
+      if (remaining <= 0) return cloned
+      if (!isChinaCountry(facility.country || 'China')) continue
+      const lat = Number(facility.latitude), lng = Number(facility.longitude)
+      if (Number.isFinite(lat) && Number.isFinite(lng)) continue
+      const cached = readGeocodeCache(facility)
+      if (cached) {
+        facility.longitude = cached[0]; facility.latitude = cached[1]; facility.coordinateSystem = 'gcj02'
+        continue
+      }
+      const address = [facility.address, facility.name, facility.city, facility.state].filter(Boolean).join(' ')
+      if (!address.trim()) continue
+      remaining -= 1
+      const result = await new Promise((resolve) => {
+        geocoder.getLocation(address, (status, result) => {
+          const loc = status === 'complete' && result?.geocodes?.[0]?.location
+          resolve(loc && typeof loc.getLng === 'function' ? [loc.getLng(), loc.getLat()] : null)
+        })
+      })
+      if (result) {
+        facility.longitude = result[0]; facility.latitude = result[1]; facility.coordinateSystem = 'gcj02'
+        writeGeocodeCache(facility, result)
+      }
+      await new Promise((resolve) => setTimeout(resolve, 90))
+    }
+  }
+  return cloned
 }
 
 function facilityPopupHtml(point) {

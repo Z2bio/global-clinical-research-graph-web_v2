@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js'
-import { initI18n, translateDocument } from './i18n.js'
+import { getLocale, initI18n, translateDocument } from './i18n.js'
 import {
   CENTER_SCOPE_LABELS,
   DEVELOPMENT_STAGE_LABELS,
@@ -28,7 +28,9 @@ import {
 
 const state = {
   query: '',
-  sourceKeys: Object.keys(SOURCE_DEFINITIONS),
+  sourceKeys: ['clinicaltrials'],
+  sourceSelectionInitialized: false,
+  sourceHealth: {},
   registrationPath: '',
   researchType: '',
   statusCode: '',
@@ -235,6 +237,7 @@ function renderCard(study, { favoriteContext = false } = {}) {
           <span class="card-update">最近公开更新：${escapeHtml(study.dates.lastUpdatePosted)}</span>
           <div class="card-actions">
             <button class="card-detail-button" type="button" data-open-detail="${escapeHtml(study.nctId)}">查看结构化详情</button>
+            ${study.facilities?.length ? `<button class="card-map-button" type="button" data-inline-map-focus="${escapeHtml(study.nctId)}">${getLocale() === 'en-US' ? 'Locate on map' : '地图定位'}</button>` : ''}
             <a class="card-link" href="${escapeHtml(safeUrl(study.sourceRecordUrl))}" target="_blank" rel="noopener noreferrer">${escapeHtml(study.sourceShort || '来源')} 原始记录 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5m0-5-9 9M19 13v6H5V5h6"/></svg></a>
           </div>
         </div>
@@ -318,7 +321,13 @@ async function ensureSnapshots() {
   const results = await (state.snapshotPromise || loadSnapshots())
   state.snapshotPromise = Promise.resolve(results)
   state.snapshotStatuses = snapshotStatusMap(results)
+  state.sourceHealth = results.sourceHealth || {}
   state.snapshotStudies = results.flatMap((result) => result.records || [])
+  if (!state.sourceSelectionInitialized) {
+    state.sourceKeys = defaultSourceKeys()
+    state.sourceSelectionInitialized = true
+  }
+  syncDesktopSourceCheckboxes()
   renderSourceCenter()
   return state.snapshotStudies
 }
@@ -670,10 +679,51 @@ async function refreshFavorites() {
   showToast(`已实时刷新 ${success}/${liveIds.length} 条 ClinicalTrials.gov 记录；其他来源按快照更新`)
 }
 
+function sourceHealthLabel(status = '', records = 0) {
+  const en = getLocale() === 'en-US'
+  if (status === 'live') return en ? 'Live' : '实时'
+  if (['ready', 'seeded'].includes(status)) return records ? (en ? `Synced ${records}` : `已同步 ${records}`) : (en ? 'Synced' : '已同步')
+  if (['partial', 'seeded-partial'].includes(status)) return records ? (en ? `Partial ${records}` : `部分 ${records}`) : (en ? 'Partial coverage' : '部分覆盖')
+  if (status === 'pending-first-sync') return en ? 'First sync pending' : '待首轮同步'
+  if (status === 'authorization-required') return en ? 'Authorization required' : '待授权'
+  if (status === 'feed-required') return en ? 'Feed required' : '待数据'
+  if (status === 'needs-seeds') return en ? 'Seeds required' : '需配置种子'
+  if (status === 'degraded') return en ? 'Degraded / cached' : '降级/旧快照'
+  if (status === 'error') return en ? 'Sync error' : '同步异常'
+  return records ? (en ? `Snapshot ${records}` : `快照 ${records}`) : (en ? 'Not connected' : '未接入')
+}
+
+function defaultSourceKeys() {
+  const ready = ['clinicaltrials']
+  Object.entries(state.snapshotStatuses || {}).forEach(([key, item]) => {
+    if ((item.records || []).length) ready.push(key)
+  })
+  return [...new Set(ready)]
+}
+
+function renderSourceFilterHealth() {
+  Object.values(SOURCE_DEFINITIONS).forEach((source) => {
+    const label = document.querySelector(`#source-filter-options [data-source-option="${source.key}"]`)
+    if (!label) return
+    const snapshot = state.snapshotStatuses?.[source.key]
+    const health = source.key === 'clinicaltrials'
+      ? (state.sourceHealth?.clinicaltrials || { status: 'live' })
+      : (snapshot || state.sourceHealth?.[source.key] || {})
+    const status = health.status || (source.key === 'clinicaltrials' ? 'live' : 'empty')
+    const records = (snapshot?.records || []).length || Number(health.recordCount) || 0
+    label.dataset.sourceHealth = status
+    const em = label.querySelector('em')
+    if (em) em.textContent = sourceHealthLabel(status, records)
+    const input = label.querySelector('input')
+    if (input) input.checked = state.sourceKeys.includes(source.key)
+  })
+}
+
 function syncDesktopSourceCheckboxes() {
   $$('#source-filter-options input[type="checkbox"]').forEach((input) => {
     input.checked = state.sourceKeys.includes(input.value)
   })
+  renderSourceFilterHealth()
 }
 
 function resetFilters({ includeQuery = true, rerun = true } = {}) {
@@ -681,7 +731,7 @@ function resetFilters({ includeQuery = true, rerun = true } = {}) {
     state.query = ''
     $('#search-input').value = ''
   }
-  state.sourceKeys = Object.keys(SOURCE_DEFINITIONS)
+  state.sourceKeys = defaultSourceKeys()
   state.registrationPath = ''
   state.researchType = ''
   state.statusCode = ''
@@ -717,7 +767,7 @@ function removeFilter(key) {
     $('#status-filter').value = ''
     return runSearch({ scroll: true })
   }
-  if (key === 'sourceKeys') { state.sourceKeys = Object.keys(SOURCE_DEFINITIONS); syncDesktopSourceCheckboxes() }
+  if (key === 'sourceKeys') { state.sourceKeys = defaultSourceKeys(); syncDesktopSourceCheckboxes() }
   if (key === 'registrationPath') { state.registrationPath = ''; $('#registration-path-filter').value = '' }
   if (key === 'researchType') { state.researchType = ''; $('#research-type-filter').value = '' }
   if (key === 'developmentStage') { state.developmentStage = ''; $('#phase-filter').value = '' }
@@ -732,7 +782,11 @@ function removeFilter(key) {
 function buildSourceCheckboxMarkup(prefix = 'm-') {
   return Object.values(SOURCE_DEFINITIONS).map((source) => {
     const checked = state.sourceKeys.includes(source.key) ? 'checked' : ''
-    return `<label><input id="${prefix}source-${escapeHtml(source.key)}" type="checkbox" value="${escapeHtml(source.key)}" ${checked}><span>${escapeHtml(source.short)}</span></label>`
+    const snapshot = state.snapshotStatuses?.[source.key]
+    const health = source.key === 'clinicaltrials' ? (state.sourceHealth?.clinicaltrials || { status: 'live' }) : (snapshot || state.sourceHealth?.[source.key] || {})
+    const status = health.status || (source.key === 'clinicaltrials' ? 'live' : 'empty')
+    const records = (snapshot?.records || []).length || Number(health.recordCount) || 0
+    return `<label data-source-health="${escapeHtml(status)}"><input id="${prefix}source-${escapeHtml(source.key)}" type="checkbox" value="${escapeHtml(source.key)}" ${checked}><span>${escapeHtml(source.short)}</span><em>${escapeHtml(sourceHealthLabel(status, records))}</em></label>`
   }).join('')
 }
 
@@ -816,16 +870,16 @@ function renderSourceCenter() {
     const status = source.key === 'clinicaltrials'
       ? { status: 'live', records: state.studies.filter((study) => study.sourceKey === 'clinicaltrials') }
       : (state.snapshotStatuses[source.key] || { status: 'loading', records: [] })
-    const statusLabel = source.key === 'clinicaltrials' ? '实时 API 已配置'
-      : status.status === 'ready' ? `已导入 ${formatNumber(status.records.length)} 条快照`
-      : status.status === 'empty' ? '官方入口已配置 · 当前快照为空'
-      : status.status === 'error' ? '快照读取异常'
-      : '正在检查本地快照'
+    const statusCode = source.key === 'clinicaltrials' ? 'live' : status.status
+    const statusLabel = sourceHealthLabel(statusCode, status.records?.length || 0)
+    const statusNote = source.key === 'clinicaltrials'
+      ? '浏览器访问时直接查询 ClinicalTrials.gov API v2。'
+      : (status.note || state.sourceHealth?.[source.key]?.note || '以数据源公开能力和配置状态为准。')
     return `<article class="source-center-card source-${escapeHtml(source.color)}">
-      <div class="source-center-top"><span class="source-layer-pill">Layer ${source.layer}</span><span class="source-mode-pill">${escapeHtml(source.mode === 'live-api' ? '访问时实时查询' : '官方数据快照/待授权接口')}</span></div>
+      <div class="source-center-top"><span class="source-layer-pill">Layer ${source.layer}</span><span class="source-mode-pill">${escapeHtml(source.mode === 'live-api' ? '访问时实时查询' : source.mode === 'scheduled-public-html' || source.mode === 'scheduled-public-query' ? 'GitHub Actions 定时同步' : '授权/导出数据源')}</span></div>
       <h3>${escapeHtml(source.name)}</h3>
       <p>${escapeHtml(source.coverage)}</p>
-      <dl><div><dt>层级</dt><dd>${escapeHtml(source.layerName)}</dd></div><div><dt>更新</dt><dd>${escapeHtml(source.cadence)}</dd></div><div><dt>当前接入</dt><dd>${escapeHtml(statusLabel)}</dd></div></dl>
+      <dl><div><dt>层级</dt><dd>${escapeHtml(source.layerName)}</dd></div><div><dt>更新</dt><dd>${escapeHtml(source.cadence)}</dd></div><div><dt>当前接入</dt><dd>${escapeHtml(statusLabel)}</dd></div></dl><p class="source-status-note">${escapeHtml(statusNote)}</p>
       <a class="secondary-button source-link-button" href="${escapeHtml(source.home)}" target="_blank" rel="noopener noreferrer">打开官方平台</a>
     </article>`
   }).join('')
@@ -905,7 +959,8 @@ function bindEvents() {
   $$('.drawer-close, .drawer-backdrop').forEach((button) => button.addEventListener('click', closeFilterDrawer))
   $('#mobile-apply-filters').addEventListener('click', applyMobileFilters)
   $('#mobile-reset-filters').addEventListener('click', () => {
-    $$('#m-source-filter-options input[type="checkbox"]').forEach((input) => { input.checked = true })
+    const defaults = new Set(defaultSourceKeys())
+    $$('#m-source-filter-options input[type="checkbox"]').forEach((input) => { input.checked = defaults.has(input.value) })
     $('#m-registration-path-filter').value = ''
     $('#m-research-type-filter').value = ''
     $('#m-status-filter').value = ''
@@ -939,6 +994,13 @@ function bindEvents() {
       if ($('#detail-modal').classList.contains('open')) closeDetail()
       if ($('#mobile-filter-drawer').classList.contains('open')) closeFilterDrawer()
     }
+  })
+  document.addEventListener('crg:language-change', () => {
+    renderSourceFilterHealth()
+    renderSourceCenter()
+    renderResults()
+    if (!$('#following-view').hidden) renderFavorites()
+    translateDocument(document.body)
   })
   window.addEventListener('hashchange', handleRoute)
 }

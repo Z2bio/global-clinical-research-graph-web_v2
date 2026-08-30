@@ -21,10 +21,16 @@ const required = [
   'assets/js/geo.js',
   'assets/js/map.js',
   'assets/js/map-view.js',
+  'assets/js/inline-map.js',
+  'assets/js/filter-scroll.js',
   'data/who-ictrp.json',
   'data/chictr.json',
   'data/nmrr.json',
   'data/nmpa.json',
+  'data/source-status.json',
+  'scripts/sync_sources.py',
+  'scripts/requirements-sync.txt',
+  '.github/workflows/sync-sources.yml',
   'assets/favicon.svg',
   'README.md'
 ]
@@ -54,7 +60,11 @@ const checks = [
   ['research map view', /id="map-view"/],
   ['research map canvas', /id="research-map-canvas"/],
   ['language toggle', /data-locale-button="en-US"/],
-  ['map module entry', /type="module" src="\.\/assets\/js\/map-view\.js"/]
+  ['map module entry', /type="module" src="\.\/assets\/js\/map-view\.js"/],
+  ['inline map entry', /type="module" src="\.\/assets\/js\/inline-map\.js"/],
+  ['filter scrollbar entry', /type="module" src="\.\/assets\/js\/filter-scroll\.js"/],
+  ['inline map canvas', /id="inline-map-canvas"/],
+  ['custom filter scrollbar', /id="filter-scroll-thumb"/]
 ]
 for (const [name, pattern] of checks) {
   if (!pattern.test(html)) errors.push(`HTML audit failed: ${name}`)
@@ -75,7 +85,7 @@ const jsFiles = fs.readdirSync(path.join(root, 'assets/js')).filter((name) => na
 for (const name of jsFiles) {
   const content = fs.readFileSync(path.join(root, 'assets/js', name), 'utf8')
   if (/eval\s*\(/.test(content)) errors.push(`Unsafe eval found in ${name}`)
-  if (/innerHTML\s*=\s*[^`'"\n]/.test(content) && !['app.js','map-view.js','map.js'].includes(name)) errors.push(`Review dynamic innerHTML in ${name}`)
+  if (/innerHTML\s*=\s*[^`'"\n]/.test(content) && !['app.js','map-view.js','map.js','inline-map.js'].includes(name)) errors.push(`Review dynamic innerHTML in ${name}`)
 }
 
 if (errors.length) {

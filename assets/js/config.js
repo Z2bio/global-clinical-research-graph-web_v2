@@ -10,7 +10,7 @@ export const CONFIG = Object.freeze({
   sourceHome: 'https://clinicaltrials.gov/',
   defaultSort: 'LastUpdatePostDate:desc',
   productName: 'Global + China Clinical Research Graph',
-  productVersion: '2.2.1',
+  productVersion: '2.3.0',
   localeKey: 'clinical-research-graph-locale-v1',
   map: Object.freeze({
     provider: 'amap',
@@ -19,7 +19,7 @@ export const CONFIG = Object.freeze({
     amapKey: '',
     amapSecurityJsCode: '',
     version: '2.0',
-    plugins: ['AMap.MarkerCluster', 'AMap.ToolBar', 'AMap.Scale'],
+    plugins: ['AMap.MarkerCluster', 'AMap.ToolBar', 'AMap.Scale', 'AMap.Geocoder'],
     style: 'amap://styles/whitesmoke',
     defaultCenterChina: [104.1954, 35.8617],
     defaultZoomChina: 4.2,
@@ -31,6 +31,8 @@ export const CONFIG = Object.freeze({
     clusterGridSize: 64,
     maxRenderedFacilities: 2500,
     selectedZoom: 11,
-    fallbackMode: 'coordinate-preview'
+    fallbackMode: 'coordinate-preview',
+    geocodeMissingChinaFacilities: true,
+    geocodeBatchLimit: 60
   })
 })

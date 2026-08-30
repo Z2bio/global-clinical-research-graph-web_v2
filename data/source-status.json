@@ -1,0 +1,40 @@
+{
+  "generatedAt": null,
+  "clinicaltrials": {
+    "status": "live",
+    "mode": "browser-live-api",
+    "recordCount": null,
+    "coverage": "full-query",
+    "note": "浏览器访问时直接调用 ClinicalTrials.gov API v2。"
+  },
+  "who": {
+    "status": "authorization-required",
+    "mode": "authorized-feed",
+    "recordCount": 0,
+    "coverage": "configured-feed",
+    "note": "取得 WHO ICTRP 允许的数据下载/Web Service 方式后，配置 WHO_ICTRP_FEED_URL 即可自动同步。"
+  },
+  "chictr": {
+    "status": "seeded",
+    "mode": "scheduled-public-html",
+    "recordCount": 10,
+    "coverage": "incremental-latest",
+    "note": "已包含官方公开页面样本；GitHub Actions 首次运行后转为每日增量同步状态。",
+    "lastSuccess": "2026-08-29T00:00:00Z"
+  },
+  "nmrr": {
+    "status": "feed-required",
+    "mode": "authorized-feed",
+    "recordCount": 0,
+    "coverage": "configured-feed",
+    "note": "配置 NMRR_FEED_URL 或放置经授权/公开导出的 data/import/nmrr.* 后自动同步。"
+  },
+  "nmpa": {
+    "status": "seeded-partial",
+    "mode": "scheduled-public-query",
+    "recordCount": 7,
+    "coverage": "seeded-incremental",
+    "note": "已包含官方公开查询样本；GitHub Actions 按公开查询和 CTR 种子每日刷新。全量历史仍需稳定批量数据源。",
+    "lastSuccess": "2026-08-29T00:00:00Z"
+  }
+}

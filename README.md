@@ -1,118 +1,217 @@
-# Global + China Clinical Research Graph v2.2.1
+# Global + China Clinical Research Graph v2.3.0
 
-面向中国客户的全球 + 中国临床研究公开信息图谱。v2.2 在 v2.1 多源研究模型上新增 **研究地图 / Research Map**，并提供 **中文 / English UI** 切换。
+面向中国客户的 **全球 + 中国临床研究公开信息图谱**。v2.3 在 v2.2.1 的多源研究模型、中文/English UI 和研究地图基础上，重点完成三件事：
 
-## v2.2.1 小版本修复
+1. **把地图直接放回公示主页面**：桌面端默认“列表 + 地图”，无需先进入单独地图页。
+2. **把左侧结构化筛选做成真正可操作的独立滚动区**：新增始终可见的自定义滚动轨道、拖拽滑块和上下箭头，不依赖 macOS 自动隐藏系统滚动条。
+3. **把“多数据源复选框”升级成自动数据管线**：ClinicalTrials.gov 继续浏览器实时查询；ChiCTR / NMPA 由 GitHub Actions 每日增量刷新；WHO ICTRP / 国家医学研究登记备案通过合规的授权/公开导出 Feed 自动导入。
 
-- 桌面端左侧“结构化筛选”改为 **sticky + 独立纵向滚动**。
-- 右侧公示结果再长，左侧筛选都可在当前视口内完整滚动查看，无需先滚到页面底部。
-- 保留移动端筛选抽屉逻辑，不改变 v2.2 的地图、双语、多源筛选和联动功能。
-- 增加稳定滚动槽与可见滚动条样式，便于 Mac/Windows 用户识别该区域可滚动。
+> 重要：复选框只负责“选择已有数据”，不会神奇地打通数据源。v2.3 新增 `.github/workflows/sync-sources.yml + scripts/sync_sources.py`，才是自动同步层。
 
+---
 
-## v2.2 新增能力
+## 一、当前五类来源的真实状态
 
-1. 左侧研究结果列表 + 右侧地图联动。
-2. 执行医院/研究中心点位聚合展示。
-3. 数据来源、研究类型、研究发起/注册路径、公开状态、国家/地区筛选与地图同步。
-4. 点击地图医院/中心，查看其关联研究。
-5. 点击研究卡片，自动定位到其公开执行中心。
-6. 为后续 `Study → Disease → Sponsor → Facility → Source` 关系图谱预留入口。
-7. 中文 / English 界面切换；研究标题和医学内容优先保留登记源原文，避免未经审核的自动医学翻译造成信息偏差。
-8. 中国优先地图模式：正式中国地图优先使用高德地图 JS API；未配置 Key 时自动退化为“坐标分布预览”，不会偷偷加载境外第三方底图。
+| 来源 | v2.3 模式 | 自动化状态 | 覆盖边界 |
+| --- | --- | --- | --- |
+| ClinicalTrials.gov | 浏览器实时 API v2 | ✅ 访问时自动查询 | 官方 API 查询范围 |
+| ChiCTR | GitHub Actions + 公开最新登记页增量 | ✅ 每日自动积累 | 从启用日起增量；不是一次性历史全量镜像 |
+| NMPA 药物临床试验登记 | GitHub Actions + 公开查询/CTR 种子 | ✅ 每日自动刷新 | 增量/种子覆盖；完整历史仍需稳定批量源 |
+| WHO ICTRP | 授权/官方导出 Feed | 🟡 配置后自动 | 未配置授权数据源时明确显示“待授权” |
+| 国家医学研究登记备案 | 公开/授权导出 Feed | 🟡 配置后自动 | 未配置机器可读 Feed 时明确显示“待数据” |
 
-## 中国场景适配
+仓库预置了少量 **ChiCTR / NMPA 官方公开记录种子**，用于让多源 UI、证据链和地图联动可以被真实测试；页面会明确标识 `seeded / partial`，不会把少量样本伪装成全量数据库。
 
-- 地图默认“中国优先”，同时保留“全球视图”。
-- 数据模型继续区分：`Source / 注册路径 / Research Type / Development Stage`。
-- 中国来源保留：ChiCTR、国家医学研究登记备案、NMPA。
-- ClinicalTrials.gov 的公开 `geoPoint` 被保留用于执行中心定位。
-- 对中国境内 WGS84/GPS 坐标，在高德地图模式下通过 `AMap.convertFrom(..., 'gps')` 转为高德坐标后再展示。
-- 不读取用户实时位置，不收集患者位置或健康信息。
+---
 
-## 数据源现状
+## 二、主页面现在直接展示地图
 
-| 来源 | 当前模式 |
-| --- | --- |
-| ClinicalTrials.gov | 访问时实时 API |
-| WHO ICTRP | 标准化快照/待官方授权接口 |
-| ChiCTR | 标准化快照/待正式数据接入 |
-| 国家医学研究登记备案 | 标准化快照/待正式数据接入 |
-| NMPA | 标准化快照/待正式数据接入 |
-
-> v2.2 不通过未经授权的网页抓取伪装成“多源实时同步”。
-
-## 直接部署 GitHub Pages
-
-把本目录全部文件覆盖到现有 GitHub 仓库根目录：
+桌面端首次打开默认：
 
 ```text
-index.html
-404.html
-assets/
-data/
-docs/
-.github/
-.nojekyll
-manifest.webmanifest
-sw.js
-...
+结构化筛选      公示结果列表           执行中心地图
+┌─────────┐   ┌────────────┐       ┌─────────────┐
+│来源      │   │Study A      │       │   ●北京      │
+│研究路径   │   │[地图定位]    │ ←→    │      ●上海   │
+│研究类型   │   │Study B      │       │    ◉聚合点   │
+│阶段/地区  │   │...          │       │             │
+└─────────┘   └────────────┘       └─────────────┘
 ```
 
-然后：
+顶部可切换：
+
+- `列表`
+- `列表 + 地图`（桌面默认）
+- `地图`
+
+联动逻辑：
+
+- 来源、研究类型、注册路径、状态、地区等筛选 → 列表与地图同时刷新；
+- 点击研究卡片“地图定位” → 自动定位其公开执行中心；
+- 点击医院/中心点 → 展示该中心关联研究；
+- 地图支持“中国优先 / 全球”切换；
+- 单独的完整“研究图谱”页面继续保留。
+
+---
+
+## 三、左侧筛选的可见滚动条
+
+v2.3 不再依赖系统滚动条。
+
+桌面端左侧具有：
+
+- 独立滚动区域；
+- 始终可见的自定义滚动槽；
+- 可拖拽滑块；
+- 上 / 下滚动按钮；
+- 点击滚动槽快速跳转；
+- 键盘 Arrow / PageUp / PageDown / Home / End；
+- 右侧结果列表长度不会改变左侧筛选的可操作性。
+
+移动端仍使用原筛选抽屉，避免把桌面交互强行缩到手机上。
+
+---
+
+## 四、自动同步架构
+
+```text
+                        ┌────────────────────────┐
+浏览器访问 ───────────→ │ ClinicalTrials.gov API │  实时
+                        └────────────────────────┘
+
+GitHub Actions（每天）
+        │
+        ├──→ ChiCTR 公开最新登记页 ──→ data/chictr.json
+        │
+        ├──→ NMPA 公开查询 + CTR seeds ─→ data/nmpa.json
+        │
+        ├──→ WHO_ICTRP_FEED_URL ─────→ data/who-ictrp.json
+        │      （取得允许的数据下载/Web Service 后配置）
+        │
+        └──→ NMRR_FEED_URL ──────────→ data/nmrr.json
+               （公开/授权导出 Feed）
+
+                         ↓
+                    source-status.json
+                         ↓
+GitHub Pages ← 标准化快照 + CTG 实时结果 ← 多源合并/筛选/地图
+```
+
+工作流：`.github/workflows/sync-sources.yml`
+
+同步脚本：`scripts/sync_sources.py`
+
+默认每天中国时间约 11:25 触发（GitHub cron 可能延迟），也支持 GitHub Actions 页面手动运行。
+
+### GitHub Secrets（可选）
+
+在仓库：`Settings → Secrets and variables → Actions` 配置：
+
+- `WHO_ICTRP_FEED_URL`：你依法/按条款取得的 WHO ICTRP JSON/CSV/TSV 下载 Feed；
+- `NMRR_FEED_URL`：国家医学研究登记备案公开/授权导出 Feed；
+- `NMPA_SEEDS`：额外的 CTR 编号或关键词，逗号分隔。
+
+如果这些 Secret 未配置，系统不会报假“已连接”，而会在页面显示：`待授权 / 待数据 / 部分覆盖`。
+
+---
+
+## 五、中国地图配置
+
+正式地图使用高德地图 JS API 2.0 适配器。
+
+打开：`assets/js/config.js`
+
+```js
+map: {
+  provider: 'amap',
+  amapKey: '',
+  amapSecurityJsCode: '',
+  ...
+}
+```
+
+填写自己的 Web(JS API) Key 与安全密钥 JsCode 后即可启用正式底图、MarkerCluster 以及中国执行机构名称地理编码。
+
+未配置 Key 时不会白屏，系统自动使用“坐标分布预览”。
+
+详见：`docs/MAP_SETUP_CN.md`。
+
+---
+
+## 六、中文 / English UI
+
+顶部 `中文 / EN`：
+
+- 导航、筛选、数据源状态、地图操作、按钮和说明支持中英文切换；
+- 官方研究标题、入排标准、研究方案等医学原文原则上保留登记源语言；
+- 不把未经审核的机器翻译当作官方医学内容。
+
+---
+
+## 七、部署到现有 GitHub Pages
+
+将 **replace-root ZIP 解压后的全部文件**覆盖现有仓库根目录，然后：
 
 ```text
 GitHub Desktop
 → Commit to main
 → Push origin
-→ GitHub Pages 自动重新构建
+→ GitHub Actions 自动部署 GitHub Pages
 ```
 
-## 配置中国地图
-
-打开：
+**v2.3 为了让定时同步后的数据一定发布到网页，Pages 发布源应切换为 GitHub Actions。**
 
 ```text
-assets/js/config.js
+Settings → Pages → Build and deployment → Source → GitHub Actions
 ```
 
-填写：
+原因：GitHub 官方明确说明，用 `GITHUB_TOKEN` 推送的 workflow commit 不会再次触发 Pages branch build。v2.3 的同步 workflow 因此会在同步后直接部署 Pages。
 
-```js
-map: {
-  provider: 'amap',
-  amapKey: 'YOUR_AMAP_WEB_JS_KEY',
-  amapSecurityJsCode: 'YOUR_SECURITY_JSCODE',
-  ...
-}
+同时需要确认 workflow 能写回快照：
+
+```text
+Settings
+→ Actions
+→ General
+→ Workflow permissions
+→ Read and write permissions
 ```
 
-未填写 Key 时，网页仍可运行，但地图区域显示 **坐标分布预览（不是正式底图）**。
+如果组织策略不允许写入，定时抓取仍可运行，但无法自动 commit 数据，需要改用外部存储或手动导入。
 
-### GitHub Pages 演示与正式生产的区别
+详见：`docs/DEPLOYMENT.md`、`docs/AUTOMATIC_SOURCE_SYNC.md`。
 
-纯 GitHub Pages 无法安全隐藏高德安全密钥。开发/演示阶段可以使用前端配置；正式生产建议按高德官方“JS API 安全密钥”文档，通过代理服务器保存安全密钥。
+---
 
-详见：`docs/MAP_SETUP_CN.md`。
-
-## English UI
-
-顶部 `中文 / EN` 可切换界面语言。
-
-- UI 标签、筛选和地图模块支持中英文切换。
-- 官方研究标题、入排标准、研究方案等医疗内容优先保留原注册平台语言。
-- 如果未来导入 ChiCTR/NMPA 的中英文字段，可在标准化快照中使用 `zhTitle / enTitle` 扩展双语内容。
-- 高德英文底图属于单独的多语言地图能力；默认配置不假设已经开通该权限。
-
-## 本地检查
+## 八、本地校验
 
 ```bash
 npm test
 npm run audit
 npm run check
+python -m py_compile scripts/sync_sources.py
 ```
+
+当前 v2.3.0：
+
+- `18 / 18` 自动化测试通过；
+- `29` 个必需文件审计通过；
+- `23` 项 HTML 检查通过；
+- `153` 个 DOM ID 引用检查通过；
+- `14` 个 JavaScript 模块语法/结构审计通过。
+
+---
+
+## 九、边界
+
+- 本平台展示公开临床研究登记信息，不构成诊断、治疗建议、入组资格判断或报名保证。
+- 不绕过登录、验证码、反爬或访问控制。
+- WHO ICTRP / 国家医学研究登记备案若没有合规机器可读数据来源，不伪装成实时连接。
+- 中国境内正式地图建议配置合规互联网地图服务，并按地图服务商及监管要求展示相关标识。
 
 ## 版本
 
-- Baseline: v2.1.0 Global + China Clinical Research Graph
-- Current: **v2.2.1 Research Map**
+- v2.1：Global + China Clinical Research Graph 数据模型基线
+- v2.2：Research Map + 中英文 UI
+- v2.2.1：左侧独立滚动修复
+- **v2.3.0：自动源同步 + 主页面直接地图 + 显式可拖拽筛选滚动条**

@@ -26,7 +26,7 @@ export function buildFacilityPoints(studies = [], { maxPoints = 2500 } = {}) {
           latitude,
           name: text(facility.name) || '未公开执行中心',
           city: text(facility.city), state: text(facility.state), country: text(facility.country), address: text(facility.address),
-          statusCode: text(facility.statusCode), contacts: facility.contacts || [], studies: [], sourceKeys: new Set()
+          statusCode: text(facility.statusCode), coordinateSystem: text(facility.coordinateSystem), contacts: facility.contacts || [], studies: [], sourceKeys: new Set()
         })
       }
       const point = index.get(id)

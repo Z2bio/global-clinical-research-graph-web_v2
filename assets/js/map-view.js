@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js'
 import { SOURCE_DEFINITIONS } from './federated.js'
 import { buildFacilityPoints, hasChinaLocation, mapMetrics, studyPrimaryLocatedFacility } from './geo.js'
-import { ResearchMapController } from './map.js'
+import { geocodeMissingChinaFacilities, ResearchMapController } from './map.js'
 import { getLocale, t, translateDocument } from './i18n.js'
 
 const $ = (selector, root = document) => root.querySelector(selector)
@@ -82,9 +82,13 @@ function renderMetrics() {
 async function renderMap() {
   const host = $('#research-map-canvas')
   if (!host) return
-  renderMetrics()
+  const mappedStudies = await geocodeMissingChinaFacilities(studies, { limit: CONFIG.map.geocodeBatchLimit })
+  const metrics = mapMetrics(mappedStudies)
+  $('#map-study-count').textContent = metrics.studyCount.toLocaleString(getLocale())
+  $('#map-located-study-count').textContent = metrics.locatedStudyCount.toLocaleString(getLocale())
+  $('#map-facility-count').textContent = metrics.facilityCount.toLocaleString(getLocale())
   $('#map-study-list').innerHTML = studies.length ? studies.slice(0, 80).map(mapStudyCard).join('') : `<div class="map-empty">${esc(t('noStudies'))}</div>`
-  const points = buildFacilityPoints(studies, { maxPoints: CONFIG.map.maxRenderedFacilities })
+  const points = buildFacilityPoints(mappedStudies, { maxPoints: CONFIG.map.maxRenderedFacilities })
   $('#map-no-coordinate-note').hidden = points.length > 0
   if (!mapController) {
     mapController = new ResearchMapController(host, {

@@ -35,8 +35,8 @@ export const SOURCE_DEFINITIONS = Object.freeze({
     layer: 2,
     layerName: '全球跨注册中心层',
     coverage: 'WHO 主注册中心网络的跨注册中心聚合',
-    mode: 'snapshot',
-    cadence: '官方数据库每周更新',
+    mode: 'authorized-feed',
+    cadence: '官方数据库每周更新；需按 WHO 条款配置下载/Web Service',
     home: 'https://trialsearch.who.int/',
     snapshot: './data/who-ictrp.json',
     color: 'cyan',
@@ -49,8 +49,8 @@ export const SOURCE_DEFINITIONS = Object.freeze({
     layer: 3,
     layerName: '中国广义临床研究层',
     coverage: '中国 IIT、观察性研究、干预性研究及其他注册研究',
-    mode: 'snapshot',
-    cadence: '以官方登记页为准',
+    mode: 'scheduled-public-html',
+    cadence: 'GitHub Actions 每日增量同步公开最新登记页',
     home: 'https://www.chictr.org.cn/',
     snapshot: './data/chictr.json',
     color: 'green',
@@ -63,8 +63,8 @@ export const SOURCE_DEFINITIONS = Object.freeze({
     layer: 3,
     layerName: '中国广义临床研究层',
     coverage: '医疗卫生机构立项后的研究登记备案与公开信息',
-    mode: 'snapshot',
-    cadence: '以官方公示为准',
+    mode: 'authorized-feed',
+    cadence: '配置公开/授权导出后由 GitHub Actions 自动同步',
     home: 'https://www.medicalresearch.org.cn/',
     snapshot: './data/nmrr.json',
     color: 'violet',
@@ -77,8 +77,8 @@ export const SOURCE_DEFINITIONS = Object.freeze({
     layer: 4,
     layerName: '中国药物注册监管层',
     coverage: '中国药物注册性临床试验、BE/PK及 I–IV 期等',
-    mode: 'snapshot',
-    cadence: '以官方公示为准',
+    mode: 'scheduled-public-query',
+    cadence: 'GitHub Actions 每日刷新公开查询与 CTR 种子',
     home: 'https://www.chinadrugtrials.org.cn/',
     snapshot: './data/nmpa.json',
     color: 'orange',
@@ -111,7 +111,8 @@ function normalizeFacility(item = {}, index = 0) {
     address: cleanText(item.address || [item.name || item.facility, item.city, item.state, item.country].filter(Boolean).join('，'), UNKNOWN),
     latitude: Number.isFinite(Number(item.latitude)) ? Number(item.latitude) : null,
     longitude: Number.isFinite(Number(item.longitude)) ? Number(item.longitude) : null,
-    contacts: arr(item.contacts).map(normalizeContact)
+    contacts: arr(item.contacts).map(normalizeContact),
+    coordinateSystem: cleanText(item.coordinateSystem)
   }
 }
 
@@ -257,7 +258,7 @@ export function normalizeSnapshotRecord(record = {}, sourceKey) {
     sourceShort: source.short,
     sourceLayer: source.layer,
     sourceLayerName: source.layerName,
-    sourceMode: 'snapshot',
+    sourceMode: source.mode,
     sourceRecords: [{ sourceKey, sourceName: source.name, id: primaryId, url: sourceUrl, updatedAt: lastUpdate }]
   }
 }
@@ -296,9 +297,21 @@ export function filterSnapshotStudies(studies, query = '', statusCode = '') {
   })
 }
 
+export async function loadSourceHealth() {
+  try {
+    const response = await fetch('./data/source-status.json', { cache: 'no-store' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    return await response.json()
+  } catch (error) {
+    return { generatedAt: '', error: error.message || String(error) }
+  }
+}
+
 export async function loadSnapshots() {
-  const defs = Object.values(SOURCE_DEFINITIONS).filter((source) => source.mode === 'snapshot' && source.snapshot)
+  const defs = Object.values(SOURCE_DEFINITIONS).filter((source) => source.snapshot)
+  const health = await loadSourceHealth()
   const results = await Promise.all(defs.map(async (source) => {
+    const healthEntry = health?.[source.key] || {}
     try {
       const response = await fetch(source.snapshot, { cache: 'no-store' })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -306,16 +319,21 @@ export async function loadSnapshots() {
       const records = arr(payload.records).map((record) => normalizeSnapshotRecord(record, source.key))
       return {
         sourceKey: source.key,
-        status: records.length ? 'ready' : 'empty',
-        generatedAt: cleanText(payload.generatedAt),
+        status: cleanText(healthEntry.status, records.length ? 'ready' : 'empty'),
+        mode: cleanText(healthEntry.mode, source.mode),
+        coverage: cleanText(healthEntry.coverage),
+        generatedAt: cleanText(payload.generatedAt || healthEntry.lastSuccess),
         sourceProcessedAt: cleanText(payload.sourceProcessedAt),
+        lastAttempt: cleanText(healthEntry.lastAttempt),
+        lastSuccess: cleanText(healthEntry.lastSuccess || payload.generatedAt),
         records,
-        note: cleanText(payload.note)
+        note: cleanText(healthEntry.note || payload.note)
       }
     } catch (error) {
-      return { sourceKey: source.key, status: 'error', generatedAt: '', records: [], note: error.message }
+      return { sourceKey: source.key, status: 'error', mode: source.mode, generatedAt: '', records: [], note: error.message }
     }
   }))
+  results.sourceHealth = health
   return results
 }
 

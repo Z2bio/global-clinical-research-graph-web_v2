@@ -134,7 +134,8 @@
       </div>
 
       <div class="container main-grid">
-        <aside class="filters-panel" aria-label="筛选条件">
+        <div class="filters-shell" id="filters-shell">
+        <aside class="filters-panel" id="filters-panel" tabindex="0" aria-label="筛选条件">
           <div class="panel-heading">
             <div>
               <span class="panel-kicker">结构化筛选</span>
@@ -146,11 +147,11 @@
           <fieldset class="filter-group source-filter-group" id="source-filter-fieldset">
             <legend>数据来源 <span class="filter-inline-hint">可多选</span></legend>
             <div id="source-filter-options" class="source-filter-options">
-              <label><input type="checkbox" value="clinicaltrials" checked><span>ClinicalTrials.gov</span></label>
-              <label><input type="checkbox" value="who" checked><span>WHO ICTRP</span></label>
-              <label><input type="checkbox" value="chictr" checked><span>ChiCTR</span></label>
-              <label><input type="checkbox" value="nmrr" checked><span>国家医学研究备案</span></label>
-              <label><input type="checkbox" value="nmpa" checked><span>NMPA</span></label>
+              <label data-source-option="clinicaltrials"><input type="checkbox" value="clinicaltrials" checked><span>ClinicalTrials.gov</span><em data-source-state="clinicaltrials">实时</em></label>
+              <label data-source-option="who"><input type="checkbox" value="who"><span>WHO ICTRP</span><em data-source-state="who">待授权</em></label>
+              <label data-source-option="chictr"><input type="checkbox" value="chictr" checked><span>ChiCTR</span><em data-source-state="chictr">自动快照</em></label>
+              <label data-source-option="nmrr"><input type="checkbox" value="nmrr"><span>国家医学研究备案</span><em data-source-state="nmrr">待数据</em></label>
+              <label data-source-option="nmpa"><input type="checkbox" value="nmpa" checked><span>NMPA</span><em data-source-state="nmpa">自动快照</em></label>
             </div>
           </fieldset>
 
@@ -285,6 +286,12 @@
             <p>来源、研究发起/注册路径、研究类型、药物开发阶段是四个独立维度。ClinicalTrials.gov 不会被平台自动判定为“注册性”或“IIT”；只有来源证据足够时才显示明确分类。</p>
           </div>
         </aside>
+        <div id="filter-scrollbar" class="filter-scrollbar" aria-label="筛选面板滚动条">
+          <button id="filter-scroll-up" class="filter-scroll-arrow" type="button" aria-label="向上滚动筛选项">▲</button>
+          <div id="filter-scroll-track" class="filter-scroll-track"><div id="filter-scroll-thumb" class="filter-scroll-thumb" tabindex="0" role="scrollbar" aria-controls="filters-panel" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div>
+          <button id="filter-scroll-down" class="filter-scroll-arrow" type="button" aria-label="向下滚动筛选项">▼</button>
+        </div>
+        </div>
 
         <section class="results-section" aria-labelledby="results-title">
           <div class="results-toolbar">
@@ -293,15 +300,48 @@
               <h2 id="results-title">临床研究公示列表</h2>
               <p id="results-summary">正在准备数据……</p>
             </div>
-            <button id="mobile-filter-button" class="secondary-button mobile-filter-button" type="button">筛选</button>
+            <div class="results-toolbar-actions">
+              <div id="results-view-switch" class="results-view-switch" role="group" aria-label="结果展示方式">
+                <button type="button" data-results-view="list" data-i18n="viewList">列表</button>
+                <button type="button" data-results-view="split" class="active" data-i18n="viewSplit">列表 + 地图</button>
+                <button type="button" data-results-view="map" data-i18n="viewMap">地图</button>
+              </div>
+              <button id="mobile-filter-button" class="secondary-button mobile-filter-button" type="button">筛选</button>
+            </div>
           </div>
 
           <div id="active-filter-chips" class="filter-chips" aria-label="已启用筛选条件"></div>
           <div id="results-alert" class="results-alert" role="status" hidden></div>
-          <div id="trial-list" class="trial-list" aria-live="polite"></div>
 
-          <div class="load-more-wrap">
-            <button id="load-more-button" class="secondary-button" type="button" hidden>加载更多公示记录</button>
+          <div id="results-map-layout" class="results-map-layout mode-split">
+            <div id="results-list-pane" class="results-list-pane">
+              <div id="trial-list" class="trial-list" aria-live="polite"></div>
+              <div class="load-more-wrap">
+                <button id="load-more-button" class="secondary-button" type="button" hidden>加载更多公示记录</button>
+              </div>
+            </div>
+            <aside id="inline-map-pane" class="inline-map-pane" aria-label="临床研究地图">
+              <div class="inline-map-head">
+                <div>
+                  <span class="panel-kicker">Map / 研究分布</span>
+                  <h3 data-i18n="executionMap">执行中心地图</h3>
+                  <p><span id="inline-map-study-count">0</span> 项研究 · <span id="inline-map-facility-count">0</span> 个可定位中心</p>
+                </div>
+                <div class="inline-map-scope" role="group" aria-label="地图范围">
+                  <button id="inline-map-china" class="active" type="button" data-i18n="chinaFirst">中国优先</button>
+                  <button id="inline-map-world" type="button" data-i18n="worldShort">全球</button>
+                </div>
+              </div>
+              <div class="inline-map-body">
+                <div id="inline-map-canvas" class="inline-map-canvas"></div>
+                <div id="inline-map-status" class="map-provider-status compact" aria-live="polite"></div>
+                <aside id="inline-map-facility" class="map-facility-panel inline" hidden></aside>
+              </div>
+              <div class="inline-map-foot">
+                <span data-i18n="inlineMapHint">点击研究卡片“地图定位”或直接点击医院/中心点。</span>
+                <a href="#/map" class="text-button" data-i18n="openFullMap">打开完整研究图谱 →</a>
+              </div>
+            </aside>
           </div>
         </section>
       </div>
@@ -422,7 +462,7 @@
 
       <div class="source-principle-callout">
         <strong>当前 GitHub Pages 版本的真实性边界</strong>
-        <p>ClinicalTrials.gov 已配置匿名实时 API。WHO ICTRP、ChiCTR、国家医学研究登记备案和 NMPA 均保留标准化适配器与快照入口；在取得官方授权接口、下载文件或合规导出之前，页面只显示“官方入口已配置 / 当前快照为空”，不会通过未授权网页抓取伪装成实时覆盖。</p>
+        <p>ClinicalTrials.gov 继续采用匿名实时 API；ChiCTR 与 NMPA 增加 GitHub Actions 定时增量同步器；WHO ICTRP 与国家医学研究登记备案在取得允许的数据下载、Web Service 或公开/授权导出后，可通过仓库 Secret 自动接入。页面会显示每个来源的真实健康状态，不把“已配置入口”伪装成“已实时打通”。</p>
       </div>
 
       <div id="source-center-grid" class="source-center-grid" aria-live="polite"></div>
@@ -566,5 +606,7 @@
 
   <script type="module" src="./assets/js/app.js"></script>
   <script type="module" src="./assets/js/map-view.js"></script>
+  <script type="module" src="./assets/js/inline-map.js"></script>
+  <script type="module" src="./assets/js/filter-scroll.js"></script>
 </body>
 </html>

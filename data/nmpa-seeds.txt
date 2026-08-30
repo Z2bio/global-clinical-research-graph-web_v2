@@ -1,0 +1,9 @@
+# Optional public NMPA query seeds. Add CTR numbers or carefully scoped keywords, one per line.
+# The scheduled synchronizer refreshes these public query results daily.
+CTR20260083
+CTR20250202
+CTR20250307
+CTR20262164
+CTR20250799
+CTR20253728
+CTR20231537

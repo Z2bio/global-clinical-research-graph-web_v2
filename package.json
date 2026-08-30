@@ -1,6 +1,6 @@
 {
   "name": "global-china-clinical-research-graph",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "description": "GitHub Pages multi-source clinical research graph with China-first bilingual research map, site clustering and linked study navigation.",

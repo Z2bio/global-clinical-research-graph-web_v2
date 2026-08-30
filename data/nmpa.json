@@ -1,6 +1,261 @@
 {
-  "generatedAt": null,
-  "sourceProcessedAt": null,
-  "note": "当前未导入本数据源的官方批量数据。网站仍提供官方入口与接入状态，不会把空数据伪装为实时覆盖。",
-  "records": []
+  "generatedAt": "2026-08-29T00:00:00Z",
+  "sourceProcessedAt": "2026-08-29",
+  "sourceName": "NMPA Drug Clinical Trial Registry",
+  "recordCount": 7,
+  "note": "随 v2.3.0 提供的官方公开查询样本；部署后由 GitHub Actions 每日按公开查询/CTR 种子刷新。",
+  "records": [
+    {
+      "id": "CTR20260083",
+      "identifiers": {
+        "nmpa": "CTR20260083"
+      },
+      "briefTitle": "HRS-8080联合达尔西利对比氟维司群联合达尔西利在辅助内分泌治疗耐药的局部晚期或转移性乳腺癌患者中的有效性和安全性的多中心、开放、随机对照的III期临床研究",
+      "officialTitle": "HRS-8080联合达尔西利对比氟维司群联合达尔西利在辅助内分泌治疗耐药的局部晚期或转移性乳腺癌患者中的有效性和安全性的多中心、开放、随机对照的III期临床研究",
+      "statusCode": "RECRUITING",
+      "statusLabel": "招募中",
+      "conditions": [
+        "乳腺癌"
+      ],
+      "keywords": [
+        "HRS-8080片"
+      ],
+      "interventions": [
+        {
+          "name": "HRS-8080片",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "HRS-8080联合达尔西利对比氟维司群联合达尔西利在辅助内分泌治疗耐药的局部晚期或转移性乳腺癌患者中的有效性和安全性的多中心、开放、随机对照的III期临床研究"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "PHASE3",
+      "developmentStageLabel": "Ⅲ期",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20260083",
+      "plainSummary": "NMPA 公开登记：HRS-8080片；适应症：乳腺癌。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    },
+    {
+      "id": "CTR20250202",
+      "identifiers": {
+        "nmpa": "CTR20250202"
+      },
+      "briefTitle": "SPH9788片在中国健康受试者中的I期临床试验",
+      "officialTitle": "SPH9788片在中国健康受试者中的I期临床试验",
+      "statusCode": "RECRUITING",
+      "statusLabel": "招募中",
+      "conditions": [
+        "精神分裂症"
+      ],
+      "keywords": [
+        "SPH9788片"
+      ],
+      "interventions": [
+        {
+          "name": "SPH9788片",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "SPH9788片在中国健康受试者中的I期临床试验"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "PHASE1",
+      "developmentStageLabel": "Ⅰ期",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20250202",
+      "plainSummary": "NMPA 公开登记：SPH9788片；适应症：精神分裂症。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    },
+    {
+      "id": "CTR20250307",
+      "identifiers": {
+        "nmpa": "CTR20250307"
+      },
+      "briefTitle": "TQB2825注射液联合化疗治疗复发/难治性弥漫大B细胞淋巴瘤II期临床试验",
+      "officialTitle": "TQB2825注射液联合化疗治疗复发/难治性弥漫大B细胞淋巴瘤II期临床试验",
+      "statusCode": "RECRUITING",
+      "statusLabel": "招募中",
+      "conditions": [
+        "复发/难治性弥漫大B细胞淋巴瘤"
+      ],
+      "keywords": [
+        "TQB2825注射液"
+      ],
+      "interventions": [
+        {
+          "name": "TQB2825注射液",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "TQB2825注射液联合化疗治疗复发/难治性弥漫大B细胞淋巴瘤II期临床试验"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "PHASE2",
+      "developmentStageLabel": "Ⅱ期",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20250307",
+      "plainSummary": "NMPA 公开登记：TQB2825注射液；适应症：复发/难治性弥漫大B细胞淋巴瘤。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    },
+    {
+      "id": "CTR20262164",
+      "identifiers": {
+        "nmpa": "CTR20262164"
+      },
+      "briefTitle": "环孢素软胶囊人体生物等效性试验",
+      "officialTitle": "环孢素软胶囊人体生物等效性试验",
+      "statusCode": "RECRUITING",
+      "statusLabel": "招募中",
+      "conditions": [
+        "移植及非移植性适应症"
+      ],
+      "keywords": [
+        "环孢素软胶囊"
+      ],
+      "interventions": [
+        {
+          "name": "环孢素软胶囊",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "环孢素软胶囊人体生物等效性试验"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "BE",
+      "developmentStageLabel": "BE 生物等效性试验",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20262164",
+      "plainSummary": "NMPA 公开登记：环孢素软胶囊；适应症：移植及非移植性适应症。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    },
+    {
+      "id": "CTR20250799",
+      "identifiers": {
+        "nmpa": "CTR20250799"
+      },
+      "briefTitle": "阿莫西林克拉维酸钾干混悬剂生物等效性研究",
+      "officialTitle": "阿莫西林克拉维酸钾干混悬剂生物等效性研究",
+      "statusCode": "NOT_YET_RECRUITING",
+      "statusLabel": "尚未招募",
+      "conditions": [
+        "感染"
+      ],
+      "keywords": [
+        "阿莫西林克拉维酸钾干混悬剂"
+      ],
+      "interventions": [
+        {
+          "name": "阿莫西林克拉维酸钾干混悬剂",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "阿莫西林克拉维酸钾干混悬剂生物等效性研究"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "BE",
+      "developmentStageLabel": "BE 生物等效性试验",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20250799",
+      "plainSummary": "NMPA 公开登记：阿莫西林克拉维酸钾干混悬剂；适应症：感染。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    },
+    {
+      "id": "CTR20253728",
+      "identifiers": {
+        "nmpa": "CTR20253728"
+      },
+      "briefTitle": "评估SSGJ-706联合治疗晚期消化系统肿瘤的II期临床研究",
+      "officialTitle": "评估SSGJ-706联合治疗晚期消化系统肿瘤的II期临床研究",
+      "statusCode": "RECRUITING",
+      "statusLabel": "招募中",
+      "conditions": [
+        "消化系统肿瘤"
+      ],
+      "keywords": [
+        "SSGJ-706注射液"
+      ],
+      "interventions": [
+        {
+          "name": "SSGJ-706注射液",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "评估SSGJ-706联合治疗晚期消化系统肿瘤的II期临床研究"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "PHASE2",
+      "developmentStageLabel": "Ⅱ期",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20253728",
+      "plainSummary": "NMPA 公开登记：SSGJ-706注射液；适应症：消化系统肿瘤。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    },
+    {
+      "id": "CTR20231537",
+      "identifiers": {
+        "nmpa": "CTR20231537"
+      },
+      "briefTitle": "一项评估伏美替尼对携带 EGFR 或 HER2 激活突变的晚期或转移性非小细胞肺癌患者的安全性、药代动力学和抗肿瘤活性的 Ib 期剂量递增和剂量扩展研究",
+      "officialTitle": "一项评估伏美替尼对携带 EGFR 或 HER2 激活突变的晚期或转移性非小细胞肺癌患者的安全性、药代动力学和抗肿瘤活性的 Ib 期剂量递增和剂量扩展研究",
+      "statusCode": "ACTIVE_NOT_RECRUITING",
+      "statusLabel": "进行中，不再招募",
+      "conditions": [
+        "非小细胞肺癌"
+      ],
+      "keywords": [
+        "甲磺酸伏美替尼片"
+      ],
+      "interventions": [
+        {
+          "name": "甲磺酸伏美替尼片",
+          "type": "DRUG",
+          "typeLabel": "药物",
+          "description": "一项评估伏美替尼对携带 EGFR 或 HER2 激活突变的晚期或转移性非小细胞肺癌患者的安全性、药代动力学和抗肿瘤活性的 Ib 期剂量递增和剂量扩展研究"
+        }
+      ],
+      "registrationPathCode": "REGULATORY_DRUG",
+      "registrationPathNote": "记录来自国家药监局药物临床试验登记与信息公示平台，作为药品注册性临床试验路径证据展示。",
+      "researchTypeCode": "INTERVENTIONAL",
+      "researchTypeLabel": "干预性研究",
+      "developmentStageCode": "PHASE1",
+      "developmentStageLabel": "Ⅰ期",
+      "sourceRecordUrl": "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml?keywords=CTR20231537",
+      "plainSummary": "NMPA 公开登记：甲磺酸伏美替尼片；适应症：非小细胞肺癌。",
+      "sponsor": {
+        "name": "未公开",
+        "classLabel": "企业/申办方"
+      }
+    }
+  ]
 }
