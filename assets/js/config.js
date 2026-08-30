@@ -1,3 +1,6 @@
+const RUNTIME = globalThis.__CRG_RUNTIME_CONFIG__ || {}
+const MAP_RUNTIME = RUNTIME.map || {}
+
 export const CONFIG = Object.freeze({
   apiBase: 'https://clinicaltrials.gov/api/v2',
   pageSize: 30,
@@ -10,14 +13,15 @@ export const CONFIG = Object.freeze({
   sourceHome: 'https://clinicaltrials.gov/',
   defaultSort: 'LastUpdatePostDate:desc',
   productName: 'Global + China Clinical Research Graph',
-  productVersion: '2.3.0',
+  productVersion: '2.4.0',
+  usageMode: 'public-benefit-noncommercial',
   localeKey: 'clinical-research-graph-locale-v1',
   map: Object.freeze({
     provider: 'amap',
-    // GitHub Pages 演示：在下方填写高德 Web(JS API) Key 与安全密钥 JsCode。
-    // 正式生产环境建议按高德官方文档使用代理服务器保存安全密钥，不要长期明文暴露在前端。
-    amapKey: '',
-    amapSecurityJsCode: '',
+    // v2.4 supports runtime injection through runtime-config.js / GitHub Actions variables.
+    // For local testing you may still place a domain-restricted AMap Web(JS API) key here.
+    amapKey: String(MAP_RUNTIME.amapKey || ''),
+    amapSecurityJsCode: String(MAP_RUNTIME.amapSecurityJsCode || ''),
     version: '2.0',
     plugins: ['AMap.MarkerCluster', 'AMap.ToolBar', 'AMap.Scale', 'AMap.Geocoder'],
     style: 'amap://styles/whitesmoke',
@@ -26,8 +30,7 @@ export const CONFIG = Object.freeze({
     defaultCenterWorld: [18, 22],
     defaultZoomWorld: 2.1,
     showOversea: true,
-    // 高德英文底图属于多语言地图能力，需要相应权限；UI 英文切换不依赖此权限。
-    enableEnglishMapLabels: false,
+    enableEnglishMapLabels: Boolean(MAP_RUNTIME.enableEnglishMapLabels),
     clusterGridSize: 64,
     maxRenderedFacilities: 2500,
     selectedZoom: 11,

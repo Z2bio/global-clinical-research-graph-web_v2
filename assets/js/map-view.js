@@ -175,6 +175,7 @@ function initMapView() {
     syncFilterUI()
     if (!$('#map-view')?.hidden) renderMap()
   })
+  document.addEventListener('crg:layout-change', () => { if (!$('#map-view')?.hidden) requestAnimationFrame(() => mapController?.resize?.()) })
   document.addEventListener('crg:language-change', () => {
     buildSourceOptions(); syncFilterUI(); facilityPanel(activeFacility)
     if (mapController) { mapController.destroy(); mapController = null }

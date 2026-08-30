@@ -136,6 +136,7 @@ function bind() {
     if (viewMode !== 'list') render()
   })
   document.addEventListener('crg:language-change', () => { if (viewMode !== 'list') render() })
+  document.addEventListener('crg:layout-change', () => { if (viewMode !== 'list') requestAnimationFrame(() => controller?.resize?.()) })
   window.addEventListener('resize', () => {
     if (window.innerWidth <= 1080 && viewMode === 'split') setMode('list', { persist: false })
   })

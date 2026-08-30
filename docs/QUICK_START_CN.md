@@ -1,60 +1,74 @@
-# v2.3 五分钟部署说明（GitHub）
+# v2.4 GitHub Pages 快速部署
 
-## 第一步：替换代码
+## 1. 覆盖代码
 
-GitHub Desktop：
-
-`Repository → Show in Finder`
-
-把 v2.3 `replace-root.zip` 解压后的**所有文件**覆盖进去。
+将 `v2.4.0-replace-root.zip` 解压后的全部文件覆盖到 GitHub Desktop 当前仓库目录。
 
 然后：
 
-`Commit to main → Push origin`
-
-## 第二步：把 Pages 改成 GitHub Actions
-
-GitHub 网页：
-
-`Settings → Pages → Build and deployment → Source → GitHub Actions`
-
-v2.3 需要这一步，才能让每天的数据同步完成后自动发布最新快照。
-
-## 第三步：给 Actions 写权限
-
-`Settings → Actions → General → Workflow permissions → Read and write permissions → Save`
-
-## 第四步：手动跑第一次同步
-
-`Actions → Sync clinical research sources and deploy → Run workflow`
-
-成功后应看到绿色勾。
-
-## 第五步：检查网站
-
-1. 主页面默认应该看到“列表 + 地图”；
-2. 左侧筛选右边应该有清晰的上下滚动轨道和拖拽滑块；
-3. 来源状态至少可看到 CTG Live、ChiCTR seed/同步、NMPA partial/同步；
-4. WHO/NMRR 未配置时应显示待授权/待数据，而不是假 Live；
-5. 若未配置高德 Key，右侧地图为坐标预览；配置 Key 后切换正式地图。
-
-## 可选：高德地图
-
-`assets/js/config.js`
-
-填写：
-
-```js
-amapKey: '...',
-amapSecurityJsCode: '...'
+```text
+Commit to main
+→ Push origin
 ```
 
-## 可选：WHO / 国内备案 Feed
+## 2. Pages 使用 GitHub Actions
 
-`Settings → Secrets and variables → Actions`
+GitHub：
 
-创建：
+```text
+Settings → Pages
+→ Build and deployment
+→ Source = GitHub Actions
+```
+
+## 3. 允许同步 workflow 写回数据
+
+```text
+Settings → Actions → General
+→ Workflow permissions
+→ Read and write permissions
+```
+
+## 4. 配置正式中国地图（推荐）
+
+```text
+Settings → Secrets and variables → Actions → Variables
+```
+
+新增：
+
+- `AMAP_WEB_KEY`
+- `AMAP_SECURITY_JSCODE`
+- `AMAP_ENGLISH_LABELS` = `false`（需要并已具备英文标签能力时改 `true`）
+
+不配置时仍有坐标预览，不会白屏。
+
+## 5. 可选数据 Feed
+
+在 `Secrets` 中可配置：
 
 - `WHO_ICTRP_FEED_URL`
 - `NMRR_FEED_URL`
 - `NMPA_SEEDS`
+
+ChiCTR / NMPA 的公开增量/回填无需上述两个 Feed；WHO/NMRR 在未配置官方/授权机器可读来源时不会伪报为全量实时连接。
+
+## 6. 第一次手动运行
+
+```text
+Actions
+→ Sync clinical research sources and deploy
+→ Run workflow
+```
+
+等待绿色 `✓` 后访问 Pages。
+
+## 7. v2.4 人工验收点
+
+- 右上按钮应显示“列表 / 列表 + 地图 / 地图”，不能显示 `viewList` 等 key；
+- 左侧结构化筛选可收起/展开；
+- 列表与地图分隔条可拖动；
+- “中国优先 / 全球视野”应明显改变地图范围；
+- 地图聚合点应为正圆且数字居中；
+- 中英文 UI 切换正常；
+- 来源状态不能把“待 Feed”误写成“实时”。

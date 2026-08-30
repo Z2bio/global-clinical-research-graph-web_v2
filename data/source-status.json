@@ -9,32 +9,32 @@
   },
   "who": {
     "status": "authorization-required",
-    "mode": "authorized-feed",
+    "mode": "official-export-auto-ingest",
     "recordCount": 0,
-    "coverage": "configured-feed",
-    "note": "取得 WHO ICTRP 允许的数据下载/Web Service 方式后，配置 WHO_ICTRP_FEED_URL 即可自动同步。"
+    "coverage": "configured-official-export",
+    "note": "公益非商业展示可按 WHO ICTRP 条款使用公开下载数据；需一次性配置官方 CSV/XML/SharePoint/Web Service 地址，之后 GitHub Actions 自动同步。"
   },
   "chictr": {
     "status": "seeded",
-    "mode": "scheduled-public-html",
+    "mode": "scheduled-public-html-backfill",
     "recordCount": 10,
-    "coverage": "incremental-latest",
-    "note": "已包含官方公开页面样本；GitHub Actions 首次运行后转为每日增量同步状态。",
+    "coverage": "incremental-backfill",
+    "note": "已包含公开样本；GitHub Actions 每日同步公开登记页并尝试跟随公开分页，逐步增量/回填。",
     "lastSuccess": "2026-08-29T00:00:00Z"
   },
   "nmrr": {
-    "status": "feed-required",
-    "mode": "authorized-feed",
+    "status": "portal-online-feed-required",
+    "mode": "public-portal-health+official-export-auto-ingest",
     "recordCount": 0,
-    "coverage": "configured-feed",
-    "note": "配置 NMRR_FEED_URL 或放置经授权/公开导出的 data/import/nmrr.* 后自动同步。"
+    "coverage": "portal+configured-feed",
+    "note": "官网公开可访问；当前未确认稳定匿名批量项目接口。取得公开/授权导出地址后设置 NMRR_FEED_URL，GitHub Actions 自动同步。"
   },
   "nmpa": {
     "status": "seeded-partial",
-    "mode": "scheduled-public-query",
+    "mode": "scheduled-public-query-backfill",
     "recordCount": 7,
-    "coverage": "seeded-incremental",
-    "note": "已包含官方公开查询样本；GitHub Actions 按公开查询和 CTR 种子每日刷新。全量历史仍需稳定批量数据源。",
+    "coverage": "incremental-backfill",
+    "note": "已包含官方公开查询样本；GitHub Actions 每日通过公开列表、年度 CTR 前缀和交叉注册种子逐步增量/回填。",
     "lastSuccess": "2026-08-29T00:00:00Z"
   }
 }

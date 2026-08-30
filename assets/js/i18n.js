@@ -16,7 +16,7 @@ const MESSAGES = {
     chinaFirst: '中国优先', worldView: '全球视图', withCoordinatesOnly: '仅显示可定位记录',
     listMapHint: '点击左侧研究卡片可定位到其执行中心；点击地图中心可查看关联研究。',
     noStudies: '当前没有符合筛选条件的研究。', sourceEvidence: '来源证据', mapMode: '地图模式',
-    viewList: '列表', viewSplit: '列表 + 地图', viewMap: '地图', executionMap: '执行中心地图', worldShort: '全球', inlineMapHint: '点击研究卡片“地图定位”或直接点击医院/中心点。', openFullMap: '打开完整研究图谱 →',
+    viewList: '列表', viewSplit: '列表 + 地图', viewMap: '地图', executionMap: '执行中心地图', worldShort: '全球', inlineMapHint: '点击研究卡片“地图定位”或直接点击医院/中心点。', openFullMap: '打开完整研究图谱 →', collapse: '收起', expand: '展开', autoLayout: '自适应',
     zh: '中文', en: 'EN'
   },
   'en-US': {
@@ -34,7 +34,7 @@ const MESSAGES = {
     chinaFirst: 'China first', worldView: 'World view', withCoordinatesOnly: 'Located records only',
     listMapHint: 'Select a study card to focus its site; select a site on the map to view linked studies.',
     noStudies: 'No studies match the current filters.', sourceEvidence: 'Source evidence', mapMode: 'Map mode',
-    viewList: 'List', viewSplit: 'List + Map', viewMap: 'Map', executionMap: 'Site map', worldShort: 'World', inlineMapHint: 'Use “Locate on map” or select a hospital/site marker.', openFullMap: 'Open full research map →',
+    viewList: 'List', viewSplit: 'List + Map', viewMap: 'Map', executionMap: 'Site map', worldShort: 'World', inlineMapHint: 'Use “Locate on map” or select a hospital/site marker.', openFullMap: 'Open full research map →', collapse: 'Collapse', expand: 'Expand', autoLayout: 'Auto fit',
     zh: '中文', en: 'EN'
   }
 }
@@ -100,12 +100,26 @@ export function translateDocument(root = document.body) {
   const nodes = []
   while (walker.nextNode()) nodes.push(walker.currentNode)
   nodes.forEach(translateTextNode)
-  root.querySelectorAll?.('[data-i18n-placeholder]').forEach((el) => {
+  const placeholderEls = []
+  if (root.matches?.('[data-i18n-placeholder]')) placeholderEls.push(root)
+  root.querySelectorAll?.('[data-i18n-placeholder]').forEach((el) => placeholderEls.push(el))
+  placeholderEls.forEach((el) => {
     const key = el.dataset.i18nPlaceholder
     el.placeholder = t(key)
   })
-  root.querySelectorAll?.('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n) })
-  root.querySelectorAll?.('[data-locale-button]').forEach((el) => el.classList.toggle('active', el.dataset.localeButton === locale))
+  const i18nEls = []
+  if (root.matches?.('[data-i18n]')) i18nEls.push(root)
+  root.querySelectorAll?.('[data-i18n]').forEach((el) => i18nEls.push(el))
+  i18nEls.forEach((el) => {
+    const key = el.dataset.i18n
+    const translated = t(key)
+    // Never expose an internal translation key such as "viewList" to end users.
+    if (translated && translated !== key) el.textContent = translated
+  })
+  const localeEls = []
+  if (root.matches?.('[data-locale-button]')) localeEls.push(root)
+  root.querySelectorAll?.('[data-locale-button]').forEach((el) => localeEls.push(el))
+  localeEls.forEach((el) => el.classList.toggle('active', el.dataset.localeButton === locale))
 }
 
 export function getLocale() { return locale }

@@ -29,5 +29,5 @@ test('source health is explicit and seeded China sources are present', () => {
   assert.ok(chictr.records.length > 0)
   assert.ok(nmpa.records.length > 0)
   assert.equal(status.who.status, 'authorization-required')
-  assert.equal(status.nmrr.status, 'feed-required')
+  assert.ok(['feed-required', 'portal-online-feed-required'].includes(status.nmrr.status))
 })

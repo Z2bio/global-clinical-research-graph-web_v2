@@ -23,6 +23,8 @@ const required = [
   'assets/js/map-view.js',
   'assets/js/inline-map.js',
   'assets/js/filter-scroll.js',
+  'assets/js/workspace-layout.js',
+  'runtime-config.js',
   'data/who-ictrp.json',
   'data/chictr.json',
   'data/nmrr.json',
@@ -64,7 +66,10 @@ const checks = [
   ['inline map entry', /type="module" src="\.\/assets\/js\/inline-map\.js"/],
   ['filter scrollbar entry', /type="module" src="\.\/assets\/js\/filter-scroll\.js"/],
   ['inline map canvas', /id="inline-map-canvas"/],
-  ['custom filter scrollbar', /id="filter-scroll-thumb"/]
+  ['custom filter scrollbar', /id="filter-scroll-thumb"/],
+  ['collapsible filter rail', /id="filter-expand-rail"/],
+  ['results map resizer', /id="results-map-resizer"/],
+  ['map workspace resizer', /id="map-workspace-resizer"/]
 ]
 for (const [name, pattern] of checks) {
   if (!pattern.test(html)) errors.push(`HTML audit failed: ${name}`)

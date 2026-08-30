@@ -1,14 +1,14 @@
-# v2.3.0 最终验证报告
+# v2.4.0 最终验证报告
 
 ## 结论
 
-**PASS — 可作为现有 GitHub Pages 项目的 v2.3.0 完整替换基线。**
+**PASS — 可作为现有 GitHub Pages 项目的 v2.4.0 完整替换基线。**
 
 ## 已验证
 
 - `index.html` / `404.html` 位于仓库根目录；
 - GitHub Pages 相对路径资源；
-- Service Worker 缓存版本 `v2.3.0`；
+- Service Worker 缓存版本 `v2.4.0`；
 - ClinicalTrials.gov API v2 访问模块；
 - ChiCTR / NMPA / WHO / NMRR 多源快照适配；
 - `source-status.json` 来源健康状态；

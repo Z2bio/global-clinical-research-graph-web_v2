@@ -1,83 +1,85 @@
-# v2.3 中国地图接入与主页面地图说明
+# v2.4 中国地图与研究图谱工作区
 
-## 1. v2.3 地图入口
+## 1. 主页面默认布局
 
-地图现在有两种使用方式：
+桌面端主页面提供：
 
-1. **主公示页直接地图**：桌面端首次加载默认 `列表 + 地图`；
-2. **完整研究图谱页**：顶部“研究图谱 / Research Map”。
+- 列表；
+- 列表 + 地图（推荐）；
+- 地图。
 
-主页面上方还可手动切换：`列表 / 列表 + 地图 / 地图`。
+v2.4 修复了 `viewList / viewSplit / viewMap` 内部翻译 key 泄漏，用户只会看到正常中文/英文标签。
 
-## 2. 为什么中国生产地图默认使用高德
+## 2. 左侧可收缩
 
-本项目面向中国客户，正式地图展示优先采用在中国境内提供互联网地图服务的供应商。v2.3 的地图适配器默认实现高德地图 JS API 2.0。
+结构化筛选顶部有“收起”。收起后只保留窄展开栏，给结果列表和地图更多空间。
 
-项目不会把境外免费底图偷偷作为中国正式生产底图。
+左侧仍支持独立滚动和显式拖拽滚动条，不依赖 macOS 是否显示系统滚动条。
 
-## 3. 配置位置
+## 3. 地图比例可拖拽
 
-文件：`assets/js/config.js`
+列表与地图之间有分隔拖动条：
+
+- 向左拖：地图变宽；
+- 向右拖：列表变宽；
+- “自适应”：恢复推荐比例；
+- 浏览器大小变化：地图自动 resize。
+
+完整“研究图谱”页也支持结果列表收起与比例拖拽。
+
+## 4. 中国优先 / 全球视野
+
+### 中国优先
+
+优先根据中国执行中心自动 fit；当前没有中国坐标时回到中国默认视野。
+
+### 全球视野
+
+显式切换为世界范围中心/缩放，不依赖当前点位是否刚好都在中国。
+
+两种模式在高德正式地图和无 Key 的坐标预览中都有效。
+
+## 5. 聚合点视觉
+
+v2.4 保证聚合点：
+
+- 圆形不变形；
+- 数字严格居中；
+- 大小按数量适度变化；
+- 缩放/容器比例变化不拉成椭圆。
+
+## 6. 高德地图运行配置
+
+推荐通过 GitHub Repository Variables 配置，而不是改源码。
+
+`Settings → Secrets and variables → Actions → Variables`
+
+新增：
+
+- `AMAP_WEB_KEY`
+- `AMAP_SECURITY_JSCODE`
+- `AMAP_ENGLISH_LABELS`（`true` / `false`）
+
+`.github/workflows/sync-sources.yml` 部署时自动生成 `runtime-config.js`。
+
+本地也可以直接编辑 `runtime-config.js`：
 
 ```js
-map: {
-  provider: 'amap',
-  amapKey: '',
-  amapSecurityJsCode: '',
-  enableEnglishMapLabels: false,
-  geocodeMissingChinaFacilities: true,
-  geocodeBatchLimit: 60
+window.__CRG_RUNTIME_CONFIG__ = {
+  map: {
+    amapKey: 'YOUR_KEY',
+    amapSecurityJsCode: 'YOUR_JSCODE',
+    enableEnglishMapLabels: false
+  }
 }
 ```
 
-申请高德开放平台 Web端（JS API）Key 和安全密钥 JsCode 后填写。
+## 7. 无 Key 降级
 
-## 4. 无 Key 时仍直接显示
+没有高德 Key 时：
 
-如果 Key 为空：
-
-- 主页面地图区域仍存在；
+- 地图区域不消失；
 - 使用坐标分布预览；
-- 已有经纬度的执行中心仍可点击、聚合、查看关联研究；
-- 页面明确提示“非正式底图”；
-- 不会白屏。
-
-正式客户演示建议配置高德 Key，以获得完整中国地图体验。
-
-## 5. 中国执行机构缺少坐标时
-
-部分中国登记来源只提供医院/城市名称，不直接提供经纬度。
-
-配置高德 Key 后，v2.3 可以：
-
-1. 读取公开医院/城市名称；
-2. 调用 `AMap.Geocoder`；
-3. 获取展示用坐标；
-4. 缓存在浏览器本地，减少重复查询；
-5. 再参与 MarkerCluster 聚合。
-
-不会读取用户实时位置。
-
-## 6. 坐标系
-
-ClinicalTrials.gov `geoPoint` 进入高德地图时，对中国境内坐标调用：
-
-```js
-AMap.convertFrom(coords, 'gps', callback)
-```
-
-v2.3 对已标记为 `gcj02` 的点不会重复转换。
-
-## 7. 中英文
-
-- 网站 UI 可中文 / English 切换；
-- 地图控件、主页面地图标题、视图切换和中心详情同步切换；
-- 高德英文地图标注需要对应服务权限，`enableEnglishMapLabels` 默认关闭；
-- 医学研究原始字段不因 UI 语言切换而被未经审核地改写。
-
-## 8. GitHub Pages 与密钥
-
-纯 GitHub Pages 无法真正隐藏前端地图凭据。
-
-- Demo：可前端配置；
-- 正式生产：建议增加安全代理/自有后端并按地图服务商安全方案管理密钥。
+- 已有经纬度的中心仍可定位和查看关联研究；
+- 中国/全球视野仍能切换；
+- 页面明确提示非正式底图。

@@ -40,8 +40,10 @@ USER_AGENT = os.getenv(
     "GlobalClinicalResearchGraph/2.3 (+public research metadata aggregator; contact via repository)",
 )
 TIMEOUT = int(os.getenv("CRG_HTTP_TIMEOUT", "25"))
-MAX_RECORDS = int(os.getenv("CRG_MAX_SNAPSHOT_RECORDS", "5000"))
-CHICTR_DETAIL_LIMIT = int(os.getenv("CHICTR_DETAIL_LIMIT", "10"))
+MAX_RECORDS = int(os.getenv("CRG_MAX_SNAPSHOT_RECORDS", "12000"))
+CHICTR_DETAIL_LIMIT = int(os.getenv("CHICTR_DETAIL_LIMIT", "20"))
+BACKFILL_PAGES = int(os.getenv("CRG_BACKFILL_PAGES_PER_RUN", "6"))
+NMPA_PREFIX_YEARS = int(os.getenv("NMPA_PREFIX_YEARS", "4"))
 REQUEST_DELAY = float(os.getenv("CRG_REQUEST_DELAY_SECONDS", "0.45"))
 
 SESSION = requests.Session()
@@ -83,6 +85,44 @@ def fetch(url: str, *, params: dict[str, Any] | None = None) -> requests.Respons
     r = SESSION.get(url, params=params, timeout=TIMEOUT)
     r.raise_for_status()
     return r
+
+
+def next_page_url(html: str, current_url: str) -> str:
+    """Best-effort pagination that never guesses hidden/private endpoints."""
+    soup = BeautifulSoup(html, "html.parser")
+    candidates = []
+    for a in soup.find_all("a", href=True):
+        label = text(a.get_text(" ", strip=True)).lower()
+        rel = " ".join(a.get("rel") or []).lower()
+        aria = text(a.get("aria-label")).lower()
+        if rel == "next" or any(x in label for x in ("下一页", "next", "下页", "›", "»")) or "next" in aria:
+            candidates.append(urljoin(current_url, a["href"]))
+    return candidates[0] if candidates else ""
+
+
+def crawl_public_pages(start_url: str, parser, *, params: dict[str, Any] | None = None, max_pages: int = BACKFILL_PAGES) -> tuple[list[dict[str, Any]], list[str]]:
+    records: list[dict[str, Any]] = []
+    visited: set[str] = set()
+    errors: list[str] = []
+    url = start_url
+    first_params = params
+    for page_no in range(max(1, max_pages)):
+        try:
+            r = fetch(url, params=first_params if page_no == 0 else None)
+            first_params = None
+            if r.url in visited:
+                break
+            visited.add(r.url)
+            records.extend(parser(r.text, r.url) if parser.__code__.co_argcount >= 2 else parser(r.text))
+            nxt = next_page_url(r.text, r.url)
+            if not nxt or nxt in visited:
+                break
+            url = nxt
+            time.sleep(REQUEST_DELAY)
+        except Exception as e:
+            errors.append(f"page {page_no + 1}: {e}")
+            break
+    return records, errors
 
 
 def merge_snapshot(path: Path, source_name: str, new_records: list[dict[str, Any]], note: str = "") -> dict[str, Any]:
@@ -296,9 +336,13 @@ def chictr_detail_enrich(record: dict[str, Any]) -> dict[str, Any]:
 def sync_chictr() -> tuple[dict[str, Any], dict[str, Any]]:
     path = DATA / "chictr.json"
     try:
-        log("ChiCTR: fetching latest public registry page")
-        r = fetch("https://www.chictr.org.cn/searchprojEN.html")
-        records = chictr_row_records(r.text)
+        log("ChiCTR: fetching public registry pages (incremental/backfill)")
+        records, crawl_errors = crawl_public_pages(
+            "https://www.chictr.org.cn/searchprojEN.html",
+            lambda html, _url: chictr_row_records(html),
+            max_pages=BACKFILL_PAGES,
+        )
+        # detail enrichment is intentionally rate-limited and only applied to the newest batch.
         for i in range(min(CHICTR_DETAIL_LIMIT, len(records))):
             records[i] = chictr_detail_enrich(records[i])
         payload = merge_snapshot(
@@ -314,7 +358,7 @@ def sync_chictr() -> tuple[dict[str, Any], dict[str, Any]]:
             "lastSuccess": NOW,
             "recordCount": payload["recordCount"],
             "coverage": "incremental-latest",
-            "note": "每日读取公开最新登记页；从启用日期起增量积累。并非对历史 12 万+ 条记录的一次性全量镜像。",
+            "note": f"每日读取公开登记页并尝试跟随公开分页，从启用日期起持续增量/回填；单次最多 {BACKFILL_PAGES} 页。" + (f" 分页警告：{crawl_errors[:1]}" if crawl_errors else ""),
         }
         return payload, status
     except Exception as e:
@@ -395,49 +439,57 @@ def read_nmpa_seeds() -> list[str]:
 def sync_nmpa() -> tuple[dict[str, Any], dict[str, Any]]:
     path = DATA / "nmpa.json"
     new_records: list[dict[str, Any]] = []
-    errors = []
-    # Try the public list without a keyword first. Some deployments return recent rows; if not, seeds still work.
-    try:
-        r = fetch("https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml")
-        new_records.extend(nmpa_records_from_html(r.text, r.url))
-    except Exception as e:
-        errors.append(f"latest-list: {e}")
-    seeds = read_nmpa_seeds()[:80]
-    for seed in seeds:
-        try:
-            time.sleep(REQUEST_DELAY)
-            r = fetch("https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml", params={"keywords": seed})
-            new_records.extend(nmpa_records_from_html(r.text, r.url))
-        except Exception as e:
-            errors.append(f"{seed}: {e}")
-    # de-duplicate before merge
+    errors: list[str] = []
+
+    # 1) Public recent list.
+    records, errs = crawl_public_pages(
+        "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml",
+        nmpa_records_from_html,
+        max_pages=BACKFILL_PAGES,
+    )
+    new_records.extend(records); errors.extend(errs)
+
+    # 2) Year-prefix discovery gradually backfills public CTR records without guessing private APIs.
+    current_year = datetime.now(timezone.utc).year
+    prefixes = [f"CTR{year}" for year in range(current_year, current_year - max(1, NMPA_PREFIX_YEARS), -1)]
+    prefixes.extend(read_nmpa_seeds())
+    for seed in unique(prefixes)[:100]:
+        time.sleep(REQUEST_DELAY)
+        recs, errs = crawl_public_pages(
+            "https://www.chinadrugtrials.org.cn/clinicaltrials.searchlist.dhtml",
+            nmpa_records_from_html,
+            params={"keywords": seed},
+            max_pages=BACKFILL_PAGES if seed.startswith("CTR20") and len(seed) == 7 else 2,
+        )
+        new_records.extend(recs); errors.extend([f"{seed}: {e}" for e in errs])
+
     by_id = {r["id"]: r for r in new_records if r.get("id")}
     if by_id:
         payload = merge_snapshot(
             path,
             "NMPA Drug Clinical Trial Registry",
             list(by_id.values()),
-            note="自动同步公开查询结果；默认结合公开列表与可配置 CTR/关键词种子做增量发现和交叉注册补充。历史全量覆盖仍需稳定官方导出/API。",
+            note="自动同步公开查询结果；包含公开列表、年度 CTR 前缀回填和交叉注册种子。不会绕过验证码、登录或访问控制。",
         )
         status = {
-            "status": "partial",
-            "mode": "scheduled-public-query",
+            "status": "ready",
+            "mode": "scheduled-public-query-backfill",
             "lastAttempt": NOW,
             "lastSuccess": NOW,
             "recordCount": payload["recordCount"],
-            "coverage": "seeded-incremental",
-            "note": "自动刷新公开查询可发现的 NMPA 记录；若要系统性全量覆盖，建议取得稳定批量数据接口/导出。",
+            "coverage": "incremental-backfill",
+            "note": f"公开查询自动增量/回填；单个查询最多跟随 {BACKFILL_PAGES} 页。" + (f" 部分警告：{errors[:1]}" if errors else ""),
         }
         return payload, status
     old = read_json(path, {"records": []})
     return old, {
         "status": "degraded" if old.get("records") else "needs-seeds",
-        "mode": "scheduled-public-query",
+        "mode": "scheduled-public-query-backfill",
         "lastAttempt": NOW,
         "lastSuccess": old.get("generatedAt"),
         "recordCount": len(old.get("records", [])),
-        "coverage": "seeded-incremental",
-        "note": "未发现可自动解析的公开列表记录。可在 data/nmpa-seeds.txt 添加 CTR 编号/关键词，或配置稳定官方批量数据源。" + (f" 错误：{errors[:2]}" if errors else ""),
+        "coverage": "incremental-backfill",
+        "note": "本轮未解析到公开 CTR 记录；保留上次成功快照。" + (f" 错误：{errors[:2]}" if errors else ""),
     }
 
 
@@ -569,6 +621,41 @@ def sync_authorized_feed(source_key: str, display_name: str, env_var: str) -> tu
         }
 
 
+
+def portal_health(url: str, source_key: str, display_name: str) -> dict[str, Any]:
+    try:
+        r = fetch(url)
+        return {
+            "status": "portal-online",
+            "mode": "public-portal-health",
+            "lastAttempt": NOW,
+            "lastSuccess": NOW,
+            "recordCount": None,
+            "coverage": "portal-only",
+            "note": f"{display_name} 官网可访问，但当前没有确认到稳定、无需登录的批量项目数据接口；平台不会绕过账户、验证码或访问控制。",
+        }
+    except Exception as e:
+        return {"status": "error", "mode": "public-portal-health", "lastAttempt": NOW, "recordCount": None, "coverage": "portal-only", "note": f"官网健康检查失败：{e}"}
+
+
+def sync_nmrr() -> tuple[dict[str, Any], dict[str, Any]]:
+    # Prefer an official/public or institution-authorized export when configured.
+    payload, status = sync_authorized_feed("nmrr", "National Medical Research Registration", "NMRR_FEED_URL")
+    if status.get("status") not in {"feed-required", "error"} or payload.get("records"):
+        return payload, status
+    health = portal_health("https://www.medicalresearch.org.cn/", "nmrr", "国家医学研究登记备案信息系统")
+    health["status"] = "portal-online-feed-required" if health.get("status") == "portal-online" else health.get("status")
+    health["note"] = (health.get("note") or "") + " 如取得公开/授权导出地址，设置 NMRR_FEED_URL 后 GitHub Actions 将自动持续同步。"
+    return payload, health
+
+
+def sync_who() -> tuple[dict[str, Any], dict[str, Any]]:
+    payload, status = sync_authorized_feed("who", "WHO ICTRP", "WHO_ICTRP_FEED_URL")
+    if status.get("status") not in {"authorization-required", "error"} or payload.get("records"):
+        return payload, status
+    status["note"] = "WHO ICTRP 数据可免费从 Search Portal 下载，且官方数据库按周更新；批量自动化仍需要配置官方导出/SharePoint/Web Service 地址。公益、非商业展示仍须遵守 WHO 的署名、更新与非营销使用条款。"
+    return payload, status
+
 def main() -> int:
     only = {x.strip() for x in os.getenv("CRG_SYNC_ONLY", "").split(",") if x.strip()}
     statuses: dict[str, Any] = {
@@ -585,8 +672,8 @@ def main() -> int:
     tasks = [
         ("chictr", sync_chictr),
         ("nmpa", sync_nmpa),
-        ("who", lambda: sync_authorized_feed("who", "WHO ICTRP", "WHO_ICTRP_FEED_URL")),
-        ("nmrr", lambda: sync_authorized_feed("nmrr", "National Medical Research Registration", "NMRR_FEED_URL")),
+        ("who", sync_who),
+        ("nmrr", sync_nmrr),
     ]
     for key, fn in tasks:
         if only and key not in only:

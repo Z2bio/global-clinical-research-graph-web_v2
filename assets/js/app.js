@@ -1,5 +1,6 @@
 import { CONFIG } from './config.js'
 import { getLocale, initI18n, translateDocument } from './i18n.js'
+import { initWorkspaceLayout } from './workspace-layout.js'
 import {
   CENTER_SCOPE_LABELS,
   DEVELOPMENT_STAGE_LABELS,
@@ -687,6 +688,8 @@ function sourceHealthLabel(status = '', records = 0) {
   if (status === 'pending-first-sync') return en ? 'First sync pending' : '待首轮同步'
   if (status === 'authorization-required') return en ? 'Authorization required' : '待授权'
   if (status === 'feed-required') return en ? 'Feed required' : '待数据'
+  if (status === 'portal-online') return en ? 'Portal online' : '官网在线'
+  if (status === 'portal-online-feed-required') return en ? 'Portal online · feed needed' : '官网在线 · 需批量接口'
   if (status === 'needs-seeds') return en ? 'Seeds required' : '需配置种子'
   if (status === 'degraded') return en ? 'Degraded / cached' : '降级/旧快照'
   if (status === 'error') return en ? 'Sync error' : '同步异常'
@@ -1012,6 +1015,7 @@ async function registerServiceWorker() {
 
 function init() {
   initI18n()
+  initWorkspaceLayout()
   bindEvents()
   updateFavoriteBadge()
   state.versionPromise = getApiVersion()

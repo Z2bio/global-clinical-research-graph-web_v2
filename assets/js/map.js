@@ -190,9 +190,10 @@ export class ResearchMapController {
 
   async update(points = [], { chinaFirst = true } = {}) {
     this.points = points
+    this.chinaFirst = Boolean(chinaFirst)
     await this.init()
-    if (this.mode === 'amap') return this.updateAmap(points, { chinaFirst })
-    return this.updatePreview(points, { chinaFirst })
+    if (this.mode === 'amap') return this.updateAmap(points, { chinaFirst: this.chinaFirst })
+    return this.updatePreview(points, { chinaFirst: this.chinaFirst })
   }
 
   async updateAmap(points, { chinaFirst }) {
@@ -202,7 +203,7 @@ export class ResearchMapController {
       this.cluster = null
     }
     if (!points.length) {
-      this.map.setZoomAndCenter(CONFIG.map.defaultZoomChina, CONFIG.map.defaultCenterChina)
+      this.applyScope(chinaFirst ? 'china' : 'world', [])
       return
     }
     const converted = await convertChinaGpsPoints(AMap, points)
@@ -212,13 +213,12 @@ export class ResearchMapController {
     this.cluster = new AMap.MarkerCluster(this.map, data, {
       gridSize: CONFIG.map.clusterGridSize,
       renderClusterMarker: (context) => {
-        const size = Math.round(34 + Math.min(28, Math.pow(context.count / total, 0.25) * 52))
+        const count = Number(context.count) || 1
+        const size = Math.round(36 + Math.min(30, Math.log2(count + 1) * 7))
         const div = document.createElement('div')
         div.className = 'crg-map-cluster'
-        div.style.width = `${size}px`
-        div.style.height = `${size}px`
-        div.style.lineHeight = `${size}px`
-        div.textContent = context.count
+        div.style.setProperty('--cluster-size', `${size}px`)
+        div.innerHTML = `<span>${count.toLocaleString()}</span>`
         context.marker.setAnchor?.('center')
         context.marker.setContent(div)
       },
@@ -242,15 +242,28 @@ export class ResearchMapController {
         this.map.setZoomAndCenter(Math.min(currentZoom + 2, 15), event.lnglat)
       }
     })
-    const chinaPoints = converted.filter((point) => isChinaCountry(point.country))
-    const target = chinaFirst && chinaPoints.length ? chinaPoints : converted
-    this.fitPoints(target)
+    this.applyScope(chinaFirst ? 'china' : 'world', converted)
   }
 
-  fitPoints(points) {
+  applyScope(scope = 'china', points = this.renderedPoints || this.points || []) {
+    if (this.mode !== 'amap' || !this.map) return
+    const chinaPoints = points.filter((point) => isChinaCountry(point.country))
+    if (scope === 'world') {
+      // “全球视图”应当真的回到全球视野，而不是在所有记录恰好都位于中国时保持中国局部缩放。
+      this.map.setZoomAndCenter(CONFIG.map.defaultZoomWorld, CONFIG.map.defaultCenterWorld)
+      return
+    }
+    if (!chinaPoints.length) {
+      this.map.setZoomAndCenter(CONFIG.map.defaultZoomChina, CONFIG.map.defaultCenterChina)
+      return
+    }
+    this.fitPoints(chinaPoints, { minZoom: 3.8, maxZoom: 6.2 })
+  }
+
+  fitPoints(points, { minZoom = 2.2, maxZoom = 10 } = {}) {
     if (!this.map || !points.length) return
     if (points.length === 1) {
-      this.map.setZoomAndCenter(CONFIG.map.selectedZoom, points[0].mapLnglat || points[0].lnglat)
+      this.map.setZoomAndCenter(Math.min(CONFIG.map.selectedZoom, maxZoom), points[0].mapLnglat || points[0].lnglat)
       return
     }
     const lngs = points.map((p) => (p.mapLnglat || p.lnglat)[0])
@@ -259,7 +272,7 @@ export class ResearchMapController {
     const center = [(minLng + maxLng) / 2, (minLat + maxLat) / 2]
     const span = Math.max(maxLng - minLng, maxLat - minLat)
     let zoom = span > 120 ? 2.2 : span > 60 ? 3 : span > 25 ? 4 : span > 10 ? 5 : span > 4 ? 6 : span > 1 ? 8 : 10
-    if (points.some((p) => isChinaCountry(p.country)) && points.every((p) => isChinaCountry(p.country))) zoom = Math.max(zoom, 4)
+    zoom = Math.max(minZoom, Math.min(maxZoom, zoom))
     this.map.setZoomAndCenter(zoom, center)
   }
 
@@ -274,7 +287,7 @@ export class ResearchMapController {
         this.infoWindow.open(this.map, position)
       }
     } else {
-      this.updatePreview(this.points, { chinaFirst: false, selectedPointId: point.id })
+      this.updatePreview(this.points, { chinaFirst: this.chinaFirst, selectedPointId: point.id })
     }
     this.onFacilitySelect(point)
   }
@@ -287,44 +300,63 @@ export class ResearchMapController {
     return true
   }
 
-  updatePreview(points, { selectedPointId = this.selectedPointId } = {}) {
+  updatePreview(points, { chinaFirst = false, selectedPointId = this.selectedPointId } = {}) {
     const host = this.container.querySelector('.coordinate-preview-host') || this.container
-    const width = 1000, height = 560
-    const project = ([lng, lat]) => [((lng + 180) / 360) * width, ((90 - lat) / 180) * height]
+    const chinaPoints = points.filter((point) => isChinaCountry(point.country))
+    const scopedPoints = chinaFirst && chinaPoints.length ? chinaPoints : points
+    // Fallback is a coordinate preview, not an official basemap. Use a scope-specific projection so
+    // “中国优先 / 全球” is still visibly functional even before an AMap key is configured.
+    const extent = chinaFirst && chinaPoints.length
+      ? { minLng: 72, maxLng: 136, minLat: 16, maxLat: 55, width: 960, height: 620, label: 'CHINA / 中国' }
+      : { minLng: -180, maxLng: 180, minLat: -60, maxLat: 85, width: 1100, height: 620, label: 'WORLD / 全球' }
+    const { minLng, maxLng, minLat, maxLat, width, height } = extent
+    const project = ([lng, lat]) => [
+      ((lng - minLng) / (maxLng - minLng)) * width,
+      ((maxLat - lat) / (maxLat - minLat)) * height
+    ]
     const bins = new Map()
-    for (const point of points) {
-      const [x, y] = project(point.lnglat)
-      const key = `${Math.round(x / 28)}:${Math.round(y / 28)}`
+    for (const point of scopedPoints) {
+      const [lng, lat] = point.lnglat || []
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue
+      if (lng < minLng || lng > maxLng || lat < minLat || lat > maxLat) continue
+      const [x, y] = project([lng, lat])
+      const key = `${Math.round(x / 34)}:${Math.round(y / 34)}`
       if (!bins.has(key)) bins.set(key, { x, y, points: [] })
       bins.get(key).points.push(point)
     }
     const grid = []
-    for (let x = 100; x < width; x += 100) grid.push(`<line x1="${x}" y1="0" x2="${x}" y2="${height}"/>`)
-    for (let y = 70; y < height; y += 70) grid.push(`<line x1="0" y1="${y}" x2="${width}" y2="${y}"/>`)
+    for (let x = width / 10; x < width; x += width / 10) grid.push(`<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="${height}"/>`)
+    for (let y = height / 8; y < height; y += height / 8) grid.push(`<line x1="0" y1="${y.toFixed(1)}" x2="${width}" y2="${y.toFixed(1)}"/>`)
     const dots = [...bins.values()].map((bin) => {
       const count = bin.points.length
       const selected = bin.points.some((point) => point.id === selectedPointId)
-      const radius = Math.min(24, 7 + Math.sqrt(count) * 4)
+      const radius = Math.min(28, 9 + Math.log2(count + 1) * 4.5)
       const ids = bin.points.map((point) => point.id).join('||')
       return `<g class="preview-point ${selected ? 'selected' : ''}" data-preview-ids="${escapeHtml(ids)}" transform="translate(${bin.x.toFixed(1)},${bin.y.toFixed(1)})">
-        <circle r="${radius}"/><text y="4" text-anchor="middle">${count}</text>
+        <circle r="${radius}"/><text x="0" y="0" text-anchor="middle" dominant-baseline="central">${count}</text>
       </g>`
     }).join('')
-    host.innerHTML = `<div class="coordinate-preview-label">${escapeHtml(t('coordinatePreview'))}</div>
-      <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-label="${escapeHtml(t('coordinatePreview'))}">
+    host.innerHTML = `<div class="coordinate-preview-label">${escapeHtml(t('coordinatePreview'))} · ${escapeHtml(extent.label)}</div>
+      <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" aria-label="${escapeHtml(t('coordinatePreview'))}">
         <g class="preview-grid">${grid.join('')}</g>
-        <text class="preview-region" x="710" y="210">CHINA / 中国</text>
-        <text class="preview-region" x="190" y="190">AMERICAS</text>
-        <text class="preview-region" x="520" y="150">EUROPE</text>
+        <text class="preview-region" x="${(width*0.5).toFixed(1)}" y="${(height*0.5).toFixed(1)}" text-anchor="middle">${escapeHtml(extent.label)}</text>
         ${dots}
       </svg>`
     host.querySelectorAll('[data-preview-ids]').forEach((element) => {
       element.addEventListener('click', () => {
         const ids = element.dataset.previewIds.split('||')
-        const point = points.find((item) => ids.includes(item.id))
+        const point = scopedPoints.find((item) => ids.includes(item.id))
         if (point) this.selectPoint(point, { openInfo: false })
       })
     })
+  }
+
+  resize() {
+    if (this.mode === 'amap') {
+      try { this.map?.resize?.() } catch {}
+      return
+    }
+    if (this.mode === 'coordinate-preview') this.updatePreview(this.points || [], { chinaFirst: this.chinaFirst })
   }
 
   destroy() {

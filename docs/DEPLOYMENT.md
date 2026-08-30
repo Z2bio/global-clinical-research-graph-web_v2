@@ -1,16 +1,16 @@
-# v2.3 GitHub Pages 部署与自动同步
+# v2.4 GitHub Pages 部署与自动同步
 
 ## A. 覆盖当前网页代码
 
-1. 解压 `v2.3.0-replace-root.zip`。
+1. 解压 `v2.4.0-replace-root.zip`。
 2. GitHub Desktop 选择当前仓库。
 3. `Repository → Show in Finder`。
 4. 把 ZIP **内部全部文件**复制到仓库根目录并 Replace。
 5. GitHub Desktop 应出现大量 Changes。
-6. Commit：`Upgrade to v2.3.0 auto-sync map workspace`。
+6. Commit：`Upgrade to v2.4.0 auto-sync map workspace`。
 7. `Push origin`。
 
-**v2.3 请把 Pages Source 改为 GitHub Actions：**
+**v2.4 请把 Pages Source 改为 GitHub Actions：**
 
 ```text
 Settings → Pages
@@ -18,11 +18,11 @@ Build and deployment
 Source → GitHub Actions
 ```
 
-这是 v2.3 与之前版本唯一需要改变的 GitHub Pages 设置。原因是定时同步 workflow 使用 `GITHUB_TOKEN` 写回 `data/` 时，该 commit 不会自动触发 branch Pages build；因此同步 workflow 会直接上传并部署最新站点构件。
+这是 v2.4 与之前版本唯一需要改变的 GitHub Pages 设置。原因是定时同步 workflow 使用 `GITHUB_TOKEN` 写回 `data/` 时，该 commit 不会自动触发 branch Pages build；因此同步 workflow 会直接上传并部署最新站点构件。
 
 ## B. 开启自动数据同步
 
-v2.3 新增：`.github/workflows/sync-sources.yml`
+v2.4 新增：`.github/workflows/sync-sources.yml`
 
 请检查：
 
@@ -74,7 +74,7 @@ amapSecurityJsCode: 'YOUR_JSCODE'
 
 ## E. 发布后强制刷新
 
-v2.3 使用新 Service Worker 缓存版本，同时主页面地图视图使用新的偏好 key。
+v2.4 使用新 Service Worker 缓存版本，同时主页面地图视图使用新的偏好 key。
 
 如果仍看到旧版：
 
